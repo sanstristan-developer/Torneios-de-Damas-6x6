@@ -20,7 +20,6 @@
             color: #f8fafc;
         }
 
-        /* Glassmorphic card styling */
         .glass-panel {
             background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(12px);
@@ -28,7 +27,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Board grid layout dynamic responsive sizing */
         .board-container {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -54,7 +52,6 @@
             background-color: #cbd5e1;
         }
 
-        /* Highlight destination squares */
         .square.highlight::after {
             content: '';
             position: absolute;
@@ -71,7 +68,6 @@
             box-shadow: 0 0 14px rgba(239, 68, 68, 1);
         }
 
-        /* Piece styling */
         .piece {
             width: 78%;
             height: 78%;
@@ -95,7 +91,6 @@
             z-index: 20;
         }
 
-        /* Red / Player 1 piece */
         .piece-red {
             background: radial-gradient(circle at 35% 35%, #f87171, #dc2626 70%, #991b1b);
             border: 3px solid #fca5a5;
@@ -103,7 +98,6 @@
             color: #fef2f2;
         }
 
-        /* Dark / Bot piece */
         .piece-dark {
             background: radial-gradient(circle at 35% 35%, #475569, #0f172a 70%, #020617);
             border: 3px solid #94a3b8;
@@ -111,7 +105,6 @@
             color: #f8fafc;
         }
 
-        /* King crown glow */
         .piece.king .crown-icon {
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
             animation: bounce-small 2s infinite;
@@ -127,7 +120,6 @@
             50% { transform: translateY(-2px); }
         }
 
-        /* Custom scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -138,9 +130,6 @@
         ::-webkit-scrollbar-thumb {
             background: #334155;
             border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
         }
     </style>
 </head>
@@ -160,9 +149,7 @@
             </div>
         </div>
 
-        <!-- Painel Econômico (Saldo & Ingressos) -->
         <div class="flex items-center gap-2 sm:gap-4">
-            <!-- Ingressos em Espera -->
             <div class="hidden sm:flex flex-col items-end">
                 <span class="text-[10px] uppercase font-bold text-slate-400">Ingressos Ativos</span>
                 <span id="header-tickets-count" class="text-sm font-extrabold text-amber-400 flex items-center gap-1">
@@ -170,7 +157,6 @@
                 </span>
             </div>
 
-            <!-- Saldo em Conta -->
             <div class="flex flex-col items-end bg-slate-900/80 px-3 py-1.5 rounded-xl border border-emerald-500/30">
                 <span class="text-[10px] uppercase font-bold text-slate-400">Saldo Em Conta</span>
                 <span id="header-balance" class="text-base sm:text-lg font-black text-emerald-400">
@@ -178,7 +164,6 @@
                 </span>
             </div>
 
-            <!-- Botão de Ação Econômica (Apenas Saque) -->
             <button id="btn-open-withdraw" class="p-2 sm:px-3 sm:py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1">
                 <i class="fa-solid fa-building-columns"></i> <span class="hidden sm:inline">Sacar Prêmios</span>
             </button>
@@ -189,11 +174,8 @@
     <main class="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 flex flex-col justify-center items-center">
         
         <!-- VISÃO 1: COMPRA DE INGRESSOS E ENTRADA NO TORNEIO -->
-        <section id="view-lobby" class="w-full max-w-2xl flex flex-col items-center gap-6 animate-fade-in py-4">
+        <section id="view-lobby" class="w-full max-w-2xl flex flex-col items-center gap-6 py-4">
             <div class="w-full glass-panel rounded-3xl p-6 sm:p-8 text-center border border-amber-500/20 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl -z-10"></div>
-                <div class="absolute bottom-0 left-0 w-48 h-48 bg-red-500/5 rounded-full blur-3xl -z-10"></div>
-
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold mb-4">
                     <i class="fa-solid fa-crown text-amber-400"></i> Campeonatos 24/7 • 32 Jogadores
                 </div>
@@ -203,7 +185,6 @@
                     Cada ingresso custa apenas <strong class="text-amber-400">R$ 0,10</strong> e te dá direito a disputar um torneio mata-mata de 5 rodadas com 32 participantes. Chegue até a final e ganhe <strong class="text-emerald-400">R$ 1,00</strong> de prêmio!
                 </p>
 
-                <!-- Seletor de Quantidade de Ingressos -->
                 <div class="bg-slate-900/90 rounded-2xl p-5 border border-slate-700/80 mb-6 max-w-md mx-auto flex flex-col gap-4">
                     <div class="flex items-center justify-between text-xs font-bold text-slate-300">
                         <span>Quantidade de Ingressos:</span>
@@ -216,7 +197,6 @@
                         <button id="btn-qty-plus" class="w-11 h-11 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-lg font-bold border border-slate-600 transition-all active:scale-95 flex items-center justify-center">+</button>
                     </div>
 
-                    <!-- Botões Rápidos -->
                     <div class="grid grid-cols-4 gap-2">
                         <button class="btn-preset-qty py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300 border border-slate-700" data-qty="1">1x</button>
                         <button class="btn-preset-qty py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300 border border-slate-700" data-qty="5">5x</button>
@@ -224,14 +204,12 @@
                         <button class="btn-preset-qty py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300 border border-slate-700" data-qty="50">50x</button>
                     </div>
 
-                    <!-- Calculadora de Custo -->
                     <div class="border-t border-slate-800 pt-3 flex items-center justify-between">
                         <span class="text-xs text-slate-400">Custo Total:</span>
                         <span id="ticket-total-cost" class="text-xl font-black text-amber-400">R$ 0,10</span>
                     </div>
                 </div>
 
-                <!-- Botão Comprar / Iniciar -->
                 <div class="flex flex-col sm:flex-row items-center gap-3 justify-center max-w-md mx-auto">
                     <button id="btn-buy-start" class="w-full py-4 px-6 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-white font-extrabold rounded-2xl shadow-xl shadow-amber-900/30 transition-all text-base flex items-center justify-center gap-2 transform active:scale-98">
                         <i class="fa-solid fa-trophy"></i> Comprar e Iniciar Torneio
@@ -240,9 +218,8 @@
             </div>
         </section>
 
-
         <!-- VISÃO 2: ÁREA DE JOGO / PARTIDA DO TORNEIO -->
-        <section id="view-game" class="w-full max-w-4xl hidden flex-col items-center gap-4 animate-fade-in">
+        <section id="view-game" class="w-full max-w-4xl hidden flex-col items-center gap-4">
             
             <!-- BARRA DE PROGRESSO DO TORNEIO -->
             <div class="w-full glass-panel rounded-2xl p-4 shadow-xl flex flex-col gap-3">
@@ -256,36 +233,29 @@
                     </div>
                 </div>
 
-                <!-- Passos das 5 rodadas -->
                 <div class="grid grid-cols-5 gap-1.5 sm:gap-3 w-full">
-                    <!-- Step 1 -->
                     <div id="step-r1" class="step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 transition-all text-center">
                         <span class="text-[10px] text-slate-400 font-bold uppercase">32 Avos</span>
                         <span class="text-xs font-extrabold">Rodada 1</span>
                     </div>
-                    <!-- Step 2 -->
                     <div id="step-r2" class="step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 transition-all text-center">
                         <span class="text-[10px] text-slate-400 font-bold uppercase">Oitavas</span>
                         <span class="text-xs font-extrabold">Rodada 2</span>
                     </div>
-                    <!-- Step 3 -->
                     <div id="step-r3" class="step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 transition-all text-center">
                         <span class="text-[10px] text-slate-400 font-bold uppercase">Quartas</span>
                         <span class="text-xs font-extrabold">Rodada 3</span>
                     </div>
-                    <!-- Step 4 -->
                     <div id="step-r4" class="step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 transition-all text-center">
                         <span class="text-[10px] text-slate-400 font-bold uppercase">Semi</span>
                         <span class="text-xs font-extrabold">Rodada 4</span>
                     </div>
-                    <!-- Step 5 -->
                     <div id="step-r5" class="step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 transition-all text-center">
                         <span class="text-[10px] text-slate-400 font-bold uppercase">Grande Final</span>
                         <span class="text-xs font-extrabold">Rodada 5</span>
                     </div>
                 </div>
 
-                <!-- Barra Visual Percentual -->
                 <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-700">
                     <div id="tournament-progress-bar" class="bg-gradient-to-r from-amber-500 via-emerald-400 to-sky-400 h-full w-[20%] transition-all duration-500"></div>
                 </div>
@@ -294,9 +264,37 @@
             <!-- PAINEL DE JOGO & TABULEIRO -->
             <div class="w-full max-w-lg flex flex-col items-center gap-3">
                 
+                <!-- PAINEL DE RELÓGIOS / CRONÔMETROS -->
+                <div class="w-full grid grid-cols-2 gap-3">
+                    <div class="glass-panel p-2.5 rounded-2xl border border-amber-500/30 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-hourglass-half text-amber-400 text-sm"></i>
+                            <div class="flex flex-col">
+                                <span class="text-[9px] uppercase font-bold text-slate-400" id="match-timer-label">Tempo Total</span>
+                                <span id="match-timer-display" class="text-sm sm:text-base font-black text-amber-400 font-mono">01:30</span>
+                            </div>
+                        </div>
+                        <span id="sudden-death-badge" class="hidden text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">
+                            Morte Súbita
+                        </span>
+                    </div>
+
+                    <div class="glass-panel p-2.5 rounded-2xl border border-sky-500/30 flex items-center gap-2">
+                        <i class="fa-solid fa-stopwatch text-sky-400 text-sm"></i>
+                        <div class="flex flex-col w-full">
+                            <div class="flex justify-between items-center text-[9px] font-bold">
+                                <span class="uppercase text-slate-400">Jogada Atual</span>
+                                <span id="turn-timer-display" class="font-mono text-sky-300 font-black text-xs">30s</span>
+                            </div>
+                            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800 mt-1">
+                                <div id="turn-timer-bar" class="bg-sky-400 h-full w-full transition-all duration-1000"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Status da Partida Atual -->
                 <div class="w-full glass-panel rounded-2xl p-3 sm:p-4 shadow-xl flex items-center justify-between gap-2 border border-slate-700/60">
-                    <!-- Bot (P2) -->
                     <div id="player-dark-card" class="flex items-center gap-2.5 p-2 rounded-xl transition-all border border-transparent">
                         <div class="w-9 h-9 rounded-full piece-dark border-2 border-slate-400 flex items-center justify-center shadow text-xs font-bold">
                             🤖
@@ -309,7 +307,6 @@
                         </div>
                     </div>
 
-                    <!-- Indicador Turno -->
                     <div class="flex flex-col items-center justify-center">
                         <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-400">Vez de</span>
                         <div id="turn-badge" class="mt-0.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-red-500/20 text-red-400 border border-red-500/30 transition-all flex items-center gap-1.5">
@@ -318,7 +315,6 @@
                         </div>
                     </div>
 
-                    <!-- Você (P1) -->
                     <div id="player-red-card" class="flex items-center gap-2.5 p-2 rounded-xl transition-all border border-transparent">
                         <div class="text-right">
                             <div class="text-xs font-bold text-red-400">Você</div>
@@ -335,11 +331,9 @@
                 <!-- Tabuleiro -->
                 <div class="w-full relative">
                     <div id="board" class="board-container w-full border-4 border-slate-700/80 rounded-2xl overflow-hidden bg-slate-900 shadow-2xl">
-                        <!-- Squares JS Dynamic Generation -->
                     </div>
                 </div>
 
-                <!-- Ações / Controles abaixo do tabuleiro -->
                 <div class="flex items-center gap-2 w-full">
                     <button id="btn-sound" class="flex-1 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 font-semibold transition-all text-xs flex items-center justify-center gap-2">
                         <i id="sound-icon" class="fa-solid fa-volume-high text-emerald-400"></i> Som
@@ -352,11 +346,10 @@
                     </button>
                 </div>
             </div>
-
         </section>
     </main>
 
-    <!-- MODAL DE SELEÇÃO DE PAGAMENTO (PIX OU SALDO) -->
+    <!-- MODAIS DE INTERAÇÃO -->
     <div id="modal-payment-option" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-slate-200 relative">
             <button id="btn-close-payment-option" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">&times;</button>
@@ -368,7 +361,6 @@
             </p>
 
             <div class="flex flex-col gap-3">
-                <!-- Opção 1: Saldo em Conta -->
                 <button id="btn-pay-balance" class="w-full p-4 bg-slate-900/90 hover:bg-slate-800 border border-emerald-500/40 rounded-2xl transition-all flex items-center justify-between text-left group">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
@@ -379,10 +371,9 @@
                             <div id="pay-modal-balance-display" class="text-[11px] text-slate-400">Disponível: R$ 10,00</div>
                         </div>
                     </div>
-                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
 
-                <!-- Opção 2: PIX -->
                 <button id="btn-pay-pix" class="w-full p-4 bg-slate-900/90 hover:bg-slate-800 border border-teal-500/40 rounded-2xl transition-all flex items-center justify-between text-left group">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg">
@@ -393,47 +384,38 @@
                             <div class="text-[11px] text-slate-400">Aprovação Instantânea</div>
                         </div>
                     </div>
-                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE CHECKOUT PIX (SIMULAÇÃO QR CODE) -->
     <div id="modal-pix-checkout" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border border-teal-500/40 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-slate-200 text-center relative">
             <button id="btn-close-pix-checkout" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">&times;</button>
-            
             <div class="w-12 h-12 bg-teal-500/20 text-teal-400 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-teal-500/40 text-2xl">
                 <i class="fa-brands fa-pix"></i>
             </div>
             <h3 class="text-lg font-black text-white">Pagamento via PIX</h3>
             <p class="text-xs text-slate-300 mb-4">Escaneie o QR Code abaixo ou copie a chave Pix:</p>
 
-            <!-- Simulação de QR Code -->
             <div class="w-44 h-44 bg-white rounded-2xl p-2 mx-auto mb-4 flex items-center justify-center shadow-lg border-2 border-teal-400">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-42661417400052040000530398654040.105802BR5913TorneioDamas6009Maceio62070503***6304E2CA" alt="QR Code PIX" class="w-full h-full rounded-xl">
             </div>
 
-            <!-- Chave Copia e Cola -->
             <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-700 flex items-center justify-between text-xs mb-5">
                 <span class="truncate font-mono text-slate-400 text-[10px] mr-2">00020126580014BR.GOV.BCB.PIX0136...</span>
-                <button id="btn-copy-pix" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg text-[10px] shrink-0 transition-all">
-                    Copiar
-                </button>
+                <button id="btn-copy-pix" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-lg text-[10px] shrink-0 transition-all">Copiar</button>
             </div>
 
-            <!-- Botão para Simular Confirmação e Iniciar Partida -->
             <button id="btn-confirm-pix-payment" class="w-full py-3.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white font-extrabold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
                 <i class="fa-solid fa-check-circle"></i> Confirmar Pagamento PIX
             </button>
         </div>
     </div>
 
-    <!-- MODAL 1: CHAVEAMENTO DO TORNEIO (TRANSITION BRACKET) -->
     <div id="modal-bracket" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border border-slate-700 rounded-3xl max-w-xl w-full p-5 sm:p-7 shadow-2xl flex flex-col gap-4 text-center">
-            
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
                 <div class="flex items-center gap-2 text-amber-400 text-lg font-black">
                     <i class="fa-solid fa-sitemap"></i> CHAVEAMENTO DOS 32 JOGADORES
@@ -442,30 +424,21 @@
                     Rodada 1
                 </div>
             </div>
-
-            <p class="text-xs text-slate-300">
-                Acompanhe o progresso das partidas simuladas e sua chave atual no campeonato:
-            </p>
-
-            <!-- Lista visual de confrontos resumidos -->
-            <div id="bracket-matches-list" class="max-h-60 overflow-y-auto space-y-2 pr-1 text-xs">
-                <!-- Preenchido via JS -->
-            </div>
-
+            <p class="text-xs text-slate-300">Acompanhe os confrontos do torneio:</p>
+            <div id="bracket-matches-list" class="max-h-60 overflow-y-auto space-y-2 pr-1 text-xs"></div>
             <button id="btn-start-next-round" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-xl shadow-lg transition-all text-sm mt-2 flex items-center justify-center gap-2">
                 <i class="fa-solid fa-play"></i> Jogar Minha Partida Agora!
             </button>
         </div>
     </div>
 
-    <!-- MODAL 2: RESULTADO DE CADA RODADA / FINAL DO TORNEIO -->
     <div id="modal-round-result" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel border-2 border-amber-500/40 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center transform transition-all animate-fade-in">
+        <div class="glass-panel border-2 border-amber-500/40 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center transform transition-all">
             <div id="res-icon-box" class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/40 text-3xl shadow-lg">
                 🏆
             </div>
             <h2 id="res-title" class="text-2xl font-black text-white mb-1">Você Venceu!</h2>
-            <p id="res-message" class="text-slate-300 text-xs sm:text-sm mb-5">Você avançou para a próxima rodada do torneio!</p>
+            <p id="res-message" class="text-slate-300 text-xs sm:text-sm mb-5">Você avançou para a próxima rodada!</p>
             
             <div id="res-prize-box" class="hidden bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-5">
                 <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Prêmio Adicionado</span>
@@ -478,7 +451,6 @@
         </div>
     </div>
 
-    <!-- MODAL: SAQUE PIX -->
     <div id="modal-withdraw" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-slate-200">
             <div class="flex items-center justify-between mb-4">
@@ -487,73 +459,59 @@
                 </h3>
                 <button id="btn-close-withdraw" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
             </div>
-
             <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 mb-4 flex items-center justify-between text-xs">
                 <span class="text-slate-400">Saldo Disponível:</span>
                 <span id="withdraw-balance-display" class="font-extrabold text-emerald-400 text-sm">R$ 10,00</span>
             </div>
-
             <div class="flex flex-col gap-3 mb-5">
                 <div>
                     <label class="text-xs font-semibold text-slate-300 block mb-1">Chave PIX:</label>
-                    <input type="text" id="input-pix-key" placeholder="CPF, E-mail ou Telefone" class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-sky-500 text-sm">
+                    <input type="text" id="input-pix-key" placeholder="CPF, E-mail ou Telefone" class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm">
                 </div>
                 <div>
                     <label class="text-xs font-semibold text-slate-300 block mb-1">Valor do Saque (R$):</label>
-                    <input type="number" id="input-withdraw-amount" min="1" step="0.5" placeholder="Valor em reais" class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-sky-500 text-sm">
+                    <input type="number" id="input-withdraw-amount" min="1" step="0.5" placeholder="Valor em reais" class="w-full py-2.5 px-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm">
                 </div>
             </div>
-
-            <button id="btn-confirm-withdraw" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl transition-all text-sm">
+            <button id="btn-confirm-withdraw" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl text-sm">
                 Solicitar Saque PIX
             </button>
         </div>
     </div>
 
-    <!-- MODAL 5: REGRAS DO JOGO -->
     <div id="modal-rules" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-slate-200">
             <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-book-open text-amber-400"></i> Regras das Damas 6x6
             </h3>
             <ul class="text-xs sm:text-sm space-y-2 text-slate-300 mb-5">
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> Tabuleiro 6x6 compacto com 6 peças por jogador nas casas escuras.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> <strong>Você (Vermelhas)</strong> joga primeiro e anda para cima.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> <strong>Bot (Escuras)</strong> anda para baixo.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> Peças normais movem 1 casa para frente em diagonal.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> Capturas pulam sobre a peça adversária e removem ela do jogo.</li>
-                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> Peça no extremo oposto vira <strong>Dama 👑</strong> e pode andar para frente e para trás em diagonal por múltiplos quadros.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-clock text-amber-400 mt-1"></i> <strong>Partida:</strong> 1 min 30 seg max. Vence quem tiver mais peças.</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-skull text-red-400 mt-1"></i> <strong>Morte Súbita:</strong> Em empate, ganha quem comer primeiro em 60s. Se ninguém comer nada em 60s, AMBOS SÃO ELIMINADOS por inatividade!</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-stopwatch text-sky-400 mt-1"></i> <strong>Jogada:</strong> 30s no máximo (W.O.).</li>
+                <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> Peça oposta vira <strong>Dama 👑</strong>.</li>
             </ul>
-            <button id="btn-close-rules" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl transition-all">Entendi!</button>
+            <button id="btn-close-rules" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl">Entendi!</button>
         </div>
     </div>
 
-    <!-- NOTIFICAÇÃO TOAST CUSTOMIZADA -->
     <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 glass-panel px-4 py-3 rounded-2xl border border-slate-700 shadow-2xl flex items-center gap-3 text-xs font-bold">
         <i id="toast-icon" class="fa-solid fa-circle-info text-sky-400 text-base"></i>
-        <span id="toast-msg">Mensagem da notificação</span>
+        <span id="toast-msg">Notificação</span>
     </div>
 
-    <!-- JAVASCRIPT DO SISTEMA COMPLETO -->
+    <!-- JAVASCRIPT COMPLETO -->
     <script>
-        /**
-         * SISTEMA DE TORNEIO DE DAMAS 6X6 COMPLETO
-         * Inclui Economia, Chaveamento de 32 Jogadores, IA do Oponente e Motor de Damas
-         */
-
-        // 1. ESTADO GLOBAL DA ECONOMIA E TORNEIO
+        // ECONOMIA & TORNEIO
         let userBalance = 10.00;
         let activeTickets = 0;
-        let currentTournamentRound = 1; // 1 a 5
-        let tournamentBracket = []; // 32 jogadores
-        let isMatchInProgress = false;
+        let currentTournamentRound = 1;
+        let tournamentBracket = [];
+        let nextRoundSurvivors = [];
 
-        // Configurações do Torneio
         const TICKET_PRICE = 0.10;
         const PRIZE_WINNER = 1.00;
         const TOTAL_ROUNDS = 5;
 
-        // Nomes de bots para simulação dos 32 participantes
         const BOT_NAMES = [
             "Lucas", "Mateus", "Gabriel", "Enzo", "Pedro", "Felipe", "Thiago", 
             "Bruno", "Diego", "Rafael", "Rodrigo", "Marcelo", "Alexandre", 
@@ -562,10 +520,10 @@
             "Fernando", "Caio", "Douglas", "Marcos", "Murilo"
         ];
 
-        // 2. ESTADO DO MOTOR DE DAMAS 6X6
+        // MOTOR DE DAMAS E TIMERS
         const BOARD_SIZE = 6;
-        const PLAYER_RED = 'RED';   // Jogador Humano
-        const PLAYER_DARK = 'DARK'; // Bot Oponente
+        const PLAYER_RED = 'RED';
+        const PLAYER_DARK = 'DARK';
 
         let boardState = [];
         let currentPlayer = PLAYER_RED;
@@ -575,15 +533,23 @@
         let soundEnabled = true;
         let isBotThinking = false;
 
-        // Web Audio API Context & Synthesizer
+        const MATCH_DURATION_SECONDS = 90;
+        const TURN_DURATION_SECONDS = 30;
+        const SUDDEN_DEATH_DURATION_SECONDS = 60;
+
+        let matchTimeRemaining = MATCH_DURATION_SECONDS;
+        let turnTimeRemaining = TURN_DURATION_SECONDS;
+        let suddenDeathTimeRemaining = SUDDEN_DEATH_DURATION_SECONDS;
+        let matchTimerInterval = null;
+        let turnTimerInterval = null;
+        let isSuddenDeath = false;
+
         let audioCtx = null;
 
         function getAudioContext() {
             if (!audioCtx) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    audioCtx = new AudioContextClass();
-                }
+                if (AudioContextClass) audioCtx = new AudioContextClass();
             }
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
@@ -591,164 +557,167 @@
             return audioCtx;
         }
 
-        function playSound(type) {
-            if (!soundEnabled) return;
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) return;
-                const now = ctx.currentTime;
 
-                if (type === 'select') {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(440, now);
-                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.08);
-                } 
-                else if (type === 'move') {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(300, now);
-                    osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.12);
-                } 
-                else if (type === 'capture') {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(160, now);
-                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.18);
-                    gain.gain.setValueAtTime(0.35, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.18);
-                } 
-                else if (type === 'king') {
-                    const notes = [523.25, 659.25, 783.99, 1046.50];
-                    notes.forEach((freq, index) => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        const startTime = now + index * 0.07;
-                        osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(freq, startTime);
-                        gain.gain.setValueAtTime(0.2, startTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start(startTime);
-                        osc.stop(startTime + 0.25);
-                    });
-                } 
-                else if (type === 'win') {
-                    const notes = [440, 554.37, 659.25, 880];
-                    notes.forEach((freq, index) => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        const startTime = now + index * 0.12;
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(freq, startTime);
-                        gain.gain.setValueAtTime(0.3, startTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start(startTime);
-                        osc.stop(startTime + 0.4);
-                    });
-                }
-                else if (type === 'lose') {
-                    const notes = [300, 260, 220, 180];
-                    notes.forEach((freq, index) => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        const startTime = now + index * 0.12;
-                        osc.type = 'sawtooth';
-                        osc.frequency.setValueAtTime(freq, startTime);
-                        gain.gain.setValueAtTime(0.2, startTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start(startTime);
-                        osc.stop(startTime + 0.3);
-                    });
-                }
-            } catch (e) {
-                console.error("Audio Error:", e);
-            }
+function playSound(type) {
+    if (!soundEnabled) return;
+
+    try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        if (type === 'select') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.08);
+
+        } else if (type === 'move') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.12);
+
+        } else if (type === 'capture') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(160, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.18);
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.18);
+
+        } else if (type === 'king') {
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                const st = now + idx * 0.07;
+
+                o.type = 'triangle';
+                o.frequency.setValueAtTime(freq, st);
+
+                g.gain.setValueAtTime(0.2, st);
+                g.gain.exponentialRampToValueAtTime(0.001, st + 0.25);
+
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.start(st);
+                o.stop(st + 0.25);
+            });
+
+        } else if (type === 'win') {
+            [440, 554.37, 659.25, 880].forEach((freq, idx) => {
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                const st = now + idx * 0.1;
+
+                o.type = 'sine';
+                o.frequency.setValueAtTime(freq, st);
+                g.gain.setValueAtTime(0.2, st);
+                g.gain.exponentialRampToValueAtTime(0.001, st + 0.3);
+
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.start(st);
+                o.stop(st + 0.3);
+            });
+
+        } else if (type === 'lose') {
+            [300, 240, 180].forEach((freq, idx) => {
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                const st = now + idx * 0.1;
+
+                o.type = 'sawtooth';
+                o.frequency.setValueAtTime(freq, st);
+                g.gain.setValueAtTime(0.2, st);
+                g.gain.exponentialRampToValueAtTime(0.001, st + 0.25);
+
+                o.connect(g);
+                g.connect(ctx.destination);
+                o.start(st);
+                o.stop(st + 0.25);
+            });
         }
 
-        // DOM ELEMENTS
-        const viewLobby = document.getElementById('view-lobby');
-        const viewGame = document.getElementById('view-game');
-        
-        const headerBalance = document.getElementById('header-balance');
-        const headerTicketsCount = document.getElementById('header-tickets-count');
-        
-        const inputTicketQty = document.getElementById('input-ticket-qty');
-        const ticketTotalCost = document.getElementById('ticket-total-cost');
-        const btnQtyMinus = document.getElementById('btn-qty-minus');
-        const btnQtyPlus = document.getElementById('btn-qty-plus');
-        const btnBuyStart = document.getElementById('btn-buy-start');
+    } catch (e) {
+        console.error(e);
+    }
+}
 
-        const boardElem = document.getElementById('board');
-        const redScoreElem = document.getElementById('red-score');
-        const darkScoreElem = document.getElementById('dark-score');
-        const turnTextElem = document.getElementById('turn-text');
-        const turnBadgeElem = document.getElementById('turn-badge');
-        const playerRedCard = document.getElementById('player-red-card');
-        const playerDarkCard = document.getElementById('player-dark-card');
-        const botNameElem = document.getElementById('bot-name');
+        // ELEMENTOS DOM
+        let viewLobby, viewGame, headerBalance, headerTicketsCount, inputTicketQty, ticketTotalCost;
+        let boardElem, redScoreElem, darkScoreElem, turnTextElem, turnBadgeElem, playerRedCard, playerDarkCard, botNameElem;
+        let tournamentProgressBar, bracketRoundIndicator, matchTimerDisplay, matchTimerLabel, turnTimerDisplay, turnTimerBar, suddenDeathBadge;
+        let modalPaymentOption, modalPixCheckout, modalBracket, bracketMatchesList, bracketModalRoundTag, btnStartNextRound;
+        let modalRoundResult, resIconBox, resTitle, resMessage, resPrizeBox, btnResAction, modalWithdraw, modalRules;
 
-        const tournamentProgressBar = document.getElementById('tournament-progress-bar');
-        const bracketRoundIndicator = document.getElementById('bracket-round-indicator');
-
-        // Modais
-        const modalPaymentOption = document.getElementById('modal-payment-option');
-        const modalPixCheckout = document.getElementById('modal-pix-checkout');
-
-        const modalBracket = document.getElementById('modal-bracket');
-        const bracketMatchesList = document.getElementById('bracket-matches-list');
-        const bracketModalRoundTag = document.getElementById('bracket-modal-round-tag');
-        const btnStartNextRound = document.getElementById('btn-start-next-round');
-
-        const modalRoundResult = document.getElementById('modal-round-result');
-        const resIconBox = document.getElementById('res-icon-box');
-        const resTitle = document.getElementById('res-title');
-        const resMessage = document.getElementById('res-message');
-        const resPrizeBox = document.getElementById('res-prize-box');
-        const btnResAction = document.getElementById('btn-res-action');
-
-        const modalWithdraw = document.getElementById('modal-withdraw');
-        const modalRules = document.getElementById('modal-rules');
-
-        const btnOpenWithdraw = document.getElementById('btn-open-withdraw');
-        const btnCloseWithdraw = document.getElementById('btn-close-withdraw');
-        const btnConfirmWithdraw = document.getElementById('btn-confirm-withdraw');
-
-        const btnSound = document.getElementById('btn-sound');
-        const soundIcon = document.getElementById('sound-icon');
-        const btnRules = document.getElementById('btn-rules');
-        const btnCloseRules = document.getElementById('btn-close-rules');
-        const btnAbandon = document.getElementById('btn-abandon');
-
-        // INICIALIZAÇÃO DA APLICAÇÃO
         window.onload = function() {
+            bindDOMElements();
             updateBalanceDisplay();
             setupEventListeners();
         };
+
+        function bindDOMElements() {
+            viewLobby = document.getElementById('view-lobby');
+            viewGame = document.getElementById('view-game');
+            headerBalance = document.getElementById('header-balance');
+            headerTicketsCount = document.getElementById('header-tickets-count');
+            inputTicketQty = document.getElementById('input-ticket-qty');
+            ticketTotalCost = document.getElementById('ticket-total-cost');
+            
+            boardElem = document.getElementById('board');
+            redScoreElem = document.getElementById('red-score');
+            darkScoreElem = document.getElementById('dark-score');
+            turnTextElem = document.getElementById('turn-text');
+            turnBadgeElem = document.getElementById('turn-badge');
+            playerRedCard = document.getElementById('player-red-card');
+            playerDarkCard = document.getElementById('player-dark-card');
+            botNameElem = document.getElementById('bot-name');
+
+            tournamentProgressBar = document.getElementById('tournament-progress-bar');
+            bracketRoundIndicator = document.getElementById('bracket-round-indicator');
+            matchTimerDisplay = document.getElementById('match-timer-display');
+            matchTimerLabel = document.getElementById('match-timer-label');
+            turnTimerDisplay = document.getElementById('turn-timer-display');
+            turnTimerBar = document.getElementById('turn-timer-bar');
+            suddenDeathBadge = document.getElementById('sudden-death-badge');
+
+            modalPaymentOption = document.getElementById('modal-payment-option');
+            modalPixCheckout = document.getElementById('modal-pix-checkout');
+            modalBracket = document.getElementById('modal-bracket');
+            bracketMatchesList = document.getElementById('bracket-matches-list');
+            bracketModalRoundTag = document.getElementById('bracket-modal-round-tag');
+            btnStartNextRound = document.getElementById('btn-start-next-round');
+
+            modalRoundResult = document.getElementById('modal-round-result');
+            resIconBox = document.getElementById('res-icon-box');
+            resTitle = document.getElementById('res-title');
+            resMessage = document.getElementById('res-message');
+            resPrizeBox = document.getElementById('res-prize-box');
+            btnResAction = document.getElementById('btn-res-action');
+
+            modalWithdraw = document.getElementById('modal-withdraw');
+            modalRules = document.getElementById('modal-rules');
+        }
 
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
@@ -756,18 +725,11 @@
             const toastIcon = document.getElementById('toast-icon');
 
             toastMsg.textContent = message;
-            if (type === 'success') {
-                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
-            } else if (type === 'error') {
-                toastIcon.className = "fa-solid fa-circle-exclamation text-red-400 text-base";
-            } else {
-                toastIcon.className = "fa-solid fa-circle-info text-sky-400 text-base";
-            }
+            toastIcon.className = type === 'success' ? "fa-solid fa-circle-check text-emerald-400 text-base" : 
+                                (type === 'error' ? "fa-solid fa-circle-exclamation text-red-400 text-base" : "fa-solid fa-circle-info text-sky-400 text-base");
 
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
         function updateBalanceDisplay() {
@@ -779,92 +741,46 @@
         }
 
         function setupEventListeners() {
-            // Controles da quantidade de ingressos
             inputTicketQty.addEventListener('input', calculateTicketCost);
-            btnQtyMinus.addEventListener('click', () => {
-                let current = parseInt(inputTicketQty.value) || 1;
-                if (current > 1) {
-                    inputTicketQty.value = current - 1;
-                    calculateTicketCost();
-                }
+            document.getElementById('btn-qty-minus').addEventListener('click', () => {
+                let v = parseInt(inputTicketQty.value) || 1;
+                if (v > 1) { inputTicketQty.value = v - 1; calculateTicketCost(); }
             });
-            btnQtyPlus.addEventListener('click', () => {
-                let current = parseInt(inputTicketQty.value) || 1;
-                if (current < 100) {
-                    inputTicketQty.value = current + 1;
-                    calculateTicketCost();
-                }
+            document.getElementById('btn-qty-plus').addEventListener('click', () => {
+                let v = parseInt(inputTicketQty.value) || 1;
+                if (v < 100) { inputTicketQty.value = v + 1; calculateTicketCost(); }
             });
 
-            document.querySelectorAll('.btn-preset-qty').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.btn-preset-qty').forEach(b => {
+                b.addEventListener('click', (e) => {
                     inputTicketQty.value = e.target.dataset.qty;
                     calculateTicketCost();
                 });
             });
 
-            // Botão Comprar e Iniciar -> Abre Modal de Forma de Pagamento
-            btnBuyStart.addEventListener('click', openPaymentOptionsModal);
-
-            // Modais de Pagamento
+            document.getElementById('btn-buy-start').addEventListener('click', openPaymentOptionsModal);
             document.getElementById('btn-close-payment-option').addEventListener('click', () => modalPaymentOption.classList.add('hidden'));
             document.getElementById('btn-close-pix-checkout').addEventListener('click', () => modalPixCheckout.classList.add('hidden'));
 
             document.getElementById('btn-pay-balance').addEventListener('click', processBalancePayment);
             document.getElementById('btn-pay-pix').addEventListener('click', openPixCheckoutModal);
-
-            document.getElementById('btn-copy-pix').addEventListener('click', () => {
-                showToast("Chave PIX Copia e Cola copiada!", 'success');
-            });
-
+            document.getElementById('btn-copy-pix').addEventListener('click', () => showToast("Chave PIX copiada!", 'success'));
             document.getElementById('btn-confirm-pix-payment').addEventListener('click', processPixPayment);
 
-            // Saque PIX
-            btnOpenWithdraw.addEventListener('click', () => modalWithdraw.classList.remove('hidden'));
-            btnCloseWithdraw.addEventListener('click', () => modalWithdraw.classList.add('hidden'));
+            document.getElementById('btn-open-withdraw').addEventListener('click', () => modalWithdraw.classList.remove('hidden'));
+            document.getElementById('btn-close-withdraw').addEventListener('click', () => modalWithdraw.classList.add('hidden'));
+            document.getElementById('btn-confirm-withdraw').addEventListener('click', processWithdraw);
 
-            btnConfirmWithdraw.addEventListener('click', () => {
-                const pixKey = document.getElementById('input-pix-key').value.trim();
-                const amount = parseFloat(document.getElementById('input-withdraw-amount').value);
+            document.getElementById('btn-rules').addEventListener('click', () => modalRules.classList.remove('hidden'));
+            document.getElementById('btn-close-rules').addEventListener('click', () => modalRules.classList.add('hidden'));
 
-                if (!pixKey) {
-                    showToast("Por favor, informe sua chave PIX.", 'error');
-                    return;
-                }
-                if (!amount || amount <= 0) {
-                    showToast("Por favor, informe um valor de saque válido.", 'error');
-                    return;
-                }
-                if (amount > userBalance) {
-                    showToast("Saldo insuficiente para realizar este saque.", 'error');
-                    return;
-                }
-
-                userBalance -= amount;
-                updateBalanceDisplay();
-                document.getElementById('input-pix-key').value = '';
-                document.getElementById('input-withdraw-amount').value = '';
-                modalWithdraw.classList.add('hidden');
-                playSound('win');
-                showToast(`Saque PIX de R$ ${amount.toFixed(2)} enviado para processamento!`, 'success');
-            });
-
-            // Regras e Sons
-            btnRules.addEventListener('click', () => modalRules.classList.remove('hidden'));
-            btnCloseRules.addEventListener('click', () => modalRules.classList.add('hidden'));
-
-            btnSound.addEventListener('click', () => {
+            document.getElementById('btn-sound').addEventListener('click', () => {
                 soundEnabled = !soundEnabled;
-                if (soundEnabled) {
-                    soundIcon.className = "fa-solid fa-volume-high text-emerald-400";
-                    playSound('select');
-                } else {
-                    soundIcon.className = "fa-solid fa-volume-xmark text-slate-500";
-                }
+                document.getElementById('sound-icon').className = soundEnabled ? "fa-solid fa-volume-high text-emerald-400" : "fa-solid fa-volume-xmark text-slate-500";
             });
 
-            btnAbandon.addEventListener('click', () => {
-                if (confirm("Deseja realmente desistir desta partida de torneio? Você perderá a rodada atual.")) {
+            document.getElementById('btn-abandon').addEventListener('click', () => {
+                if (confirm("Deseja desistir desta partida?")) {
                     handleMatchEnd(PLAYER_DARK, "Você desistiu da partida.");
                 }
             });
@@ -876,38 +792,29 @@
         }
 
         function calculateTicketCost() {
-            let qty = parseInt(inputTicketQty.value) || 1;
-            if (qty < 1) qty = 1;
-            if (qty > 100) qty = 100;
+            let qty = Math.min(100, Math.max(1, parseInt(inputTicketQty.value) || 1));
             inputTicketQty.value = qty;
-
-            const total = qty * TICKET_PRICE;
-            ticketTotalCost.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            ticketTotalCost.textContent = `R$ ${(qty * TICKET_PRICE).toFixed(2).replace('.', ',')}`;
         }
 
-        // 3. FLUXO DE COMPRA E PAGAMENTO
         function openPaymentOptionsModal() {
-            const qty = parseInt(inputTicketQty.value) || 1;
-            const totalCost = qty * TICKET_PRICE;
-            document.getElementById('payment-modal-cost').textContent = `R$ ${totalCost.toFixed(2).replace('.', ',')}`;
+            let qty = parseInt(inputTicketQty.value) || 1;
+            document.getElementById('payment-modal-cost').textContent = `R$ ${(qty * TICKET_PRICE).toFixed(2).replace('.', ',')}`;
             modalPaymentOption.classList.remove('hidden');
         }
 
         function processBalancePayment() {
-            const qty = parseInt(inputTicketQty.value) || 1;
-            const totalCost = qty * TICKET_PRICE;
-
-            if (userBalance < totalCost) {
-                showToast("Saldo em conta insuficiente para esta compra!", 'error');
+            let qty = parseInt(inputTicketQty.value) || 1;
+            let total = qty * TICKET_PRICE;
+            if (userBalance < total) {
+                showToast("Saldo insuficiente!", 'error');
                 return;
             }
-
-            userBalance -= totalCost;
+            userBalance -= total;
             activeTickets += qty;
             updateBalanceDisplay();
-
             modalPaymentOption.classList.add('hidden');
-            showToast(`Pagamento via saldo realizado! ${qty} ingresso(s) adicionado(s).`, 'success');
+            showToast(`${qty} Ingresso(s) adquirido(s)!`, 'success');
             startNewTournament();
         }
 
@@ -917,44 +824,42 @@
         }
 
         function processPixPayment() {
-            const qty = parseInt(inputTicketQty.value) || 1;
-
+            let qty = parseInt(inputTicketQty.value) || 1;
             activeTickets += qty;
             updateBalanceDisplay();
-
             modalPixCheckout.classList.add('hidden');
             playSound('win');
-            showToast(`PIX aprovado com sucesso! ${qty} ingresso(s) adicionado(s).`, 'success');
+            showToast(`PIX Confirmado! ${qty} Ingresso(s) adicionado(s).`, 'success');
             startNewTournament();
         }
 
-        // 4. LÓGICA DO TORNEIO (CHAVEAMENTO 32 JOGADORES)
-        function startNewTournament() {
-            if (activeTickets <= 0) {
-                viewGame.classList.add('hidden');
-                viewLobby.classList.remove('flex');
-                viewLobby.classList.remove('hidden');
+        function processWithdraw() {
+            const pixKey = document.getElementById('input-pix-key').value.trim();
+            const amount = parseFloat(document.getElementById('input-withdraw-amount').value);
+
+            if (!pixKey || !amount || amount <= 0 || amount > userBalance) {
+                showToast("Dados de saque inválidos ou saldo insuficiente.", 'error');
                 return;
             }
+            userBalance -= amount;
+            updateBalanceDisplay();
+            modalWithdraw.classList.add('hidden');
+            playSound('win');
+            showToast(`Saque de R$ ${amount.toFixed(2)} realizado!`, 'success');
+        }
 
-            // Consumir 1 ingresso ativo
+        function startNewTournament() {
+            if (activeTickets <= 0) return;
             activeTickets--;
             updateBalanceDisplay();
 
             currentTournamentRound = 1;
-
-            // Gerar 32 participantes (Você + 31 bots)
-            let shuffledBots = [...BOT_NAMES].sort(() => Math.random() - 0.5);
-            tournamentBracket = [];
-            
-            // Você entra na posição 0
-            tournamentBracket.push({ id: 'human', name: 'Você (Humano)', isHuman: true });
-            
+            let shuffled = [...BOT_NAMES].sort(() => Math.random() - 0.5);
+            tournamentBracket = [{ id: 'human', name: 'Você (Humano)', isHuman: true }];
             for (let i = 0; i < 31; i++) {
-                tournamentBracket.push({ id: `bot_${i}`, name: shuffledBots[i], isHuman: false });
+                tournamentBracket.push({ id: `bot_${i}`, name: shuffled[i], isHuman: false });
             }
 
-            // Alternar tela para visão do jogo
             viewLobby.classList.add('hidden');
             viewGame.classList.remove('hidden');
             viewGame.classList.add('flex');
@@ -963,74 +868,42 @@
         }
 
         function updateProgressBar() {
-            const progressPercent = (currentTournamentRound / TOTAL_ROUNDS) * 100;
-            tournamentProgressBar.style.width = `${progressPercent}%`;
-            
-            const roundNames = ["32 Avos", "Oitavas", "Quartas", "Semi-Final", "Grande Final"];
-            bracketRoundIndicator.textContent = `Rodada ${currentTournamentRound} de 5 (${roundNames[currentTournamentRound - 1]})`;
+            tournamentProgressBar.style.width = `${(currentTournamentRound / TOTAL_ROUNDS) * 100}%`;
+            const names = ["32 Avos", "Oitavas", "Quartas", "Semi-Final", "Grande Final"];
+            bracketRoundIndicator.textContent = `Rodada ${currentTournamentRound} de 5 (${names[currentTournamentRound - 1]})`;
 
-            // Destacar cards de passos
             for (let r = 1; r <= 5; r++) {
-                const stepEl = document.getElementById(`step-r${r}`);
-                if (r < currentTournamentRound) {
-                    stepEl.className = "step-card flex flex-col items-center p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 transition-all text-center";
-                } else if (r === currentTournamentRound) {
-                    stepEl.className = "step-card flex flex-col items-center p-2 rounded-xl bg-amber-500/20 border border-amber-500 text-amber-300 shadow-lg shadow-amber-500/10 transition-all text-center scale-105";
-                } else {
-                    stepEl.className = "step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 opacity-60 transition-all text-center";
-                }
+                const el = document.getElementById(`step-r${r}`);
+                if (r < currentTournamentRound) el.className = "step-card flex flex-col items-center p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-400 text-center";
+                else if (r === currentTournamentRound) el.className = "step-card flex flex-col items-center p-2 rounded-xl bg-amber-500/20 border border-amber-500 text-amber-300 text-center scale-105";
+                else el.className = "step-card flex flex-col items-center p-2 rounded-xl bg-slate-800 border border-slate-700 opacity-60 text-center";
             }
         }
 
         function showBracketModal() {
             updateProgressBar();
-
             bracketModalRoundTag.textContent = `Rodada ${currentTournamentRound} de 5`;
             bracketMatchesList.innerHTML = '';
 
-            // Simular vencedores dos outros confrontos entre bots
-            const nextBracket = [];
+            nextRoundSurvivors = [];
+            botNameElem.textContent = `${tournamentBracket[1].name} (Nível ${currentTournamentRound})`;
 
-            // A partida 0 é SEMPRE Humano vs Bot
-            const humanMatchBot = tournamentBracket[1];
-            botNameElem.textContent = `${humanMatchBot.name} (Nível ${currentTournamentRound})`;
-
-            // Exibir lista de confrontos nesta rodada
             for (let i = 0; i < tournamentBracket.length; i += 2) {
                 const p1 = tournamentBracket[i];
                 const p2 = tournamentBracket[i+1];
-
-                const matchRow = document.createElement('div');
-                matchRow.className = "flex items-center justify-between bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs";
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs";
 
                 if (p1.isHuman || p2.isHuman) {
-                    matchRow.classList.add('border-amber-500/50', 'bg-amber-500/10');
-                    matchRow.innerHTML = `
-                        <div class="flex items-center gap-2 font-bold text-amber-400">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                            ${p1.name}
-                        </div>
-                        <span class="font-extrabold text-slate-500 text-[10px] uppercase">VS</span>
-                        <div class="font-bold text-sky-400">${p2.name}</div>
-                    `;
+                    row.classList.add('border-amber-500/50', 'bg-amber-500/10');
+                    row.innerHTML = `<div class="font-bold text-amber-400">${p1.name}</div><span class="text-slate-500 font-bold">VS</span><div class="font-bold text-sky-400">${p2.name}</div>`;
                 } else {
-                    // Simular aleatoriamente quem vence entre dois bots
-                    const winnerBot = Math.random() > 0.5 ? p1 : p2;
-                    nextBracket.push(winnerBot);
-
-                    matchRow.innerHTML = `
-                        <div class="font-medium text-slate-300">${p1.name}</div>
-                        <span class="text-slate-600 text-[10px]">VS</span>
-                        <div class="font-medium text-slate-300">${p2.name}</div>
-                    `;
+                    const winner = Math.random() > 0.5 ? p1 : p2;
+                    nextRoundSurvivors.push(winner);
+                    row.innerHTML = `<div class="text-slate-300">${p1.name}</div><span class="text-slate-600">VS</span><div class="text-slate-300">${p2.name}</div>`;
                 }
-
-                bracketMatchesList.appendChild(matchRow);
+                bracketMatchesList.appendChild(row);
             }
-
-            // Guardar bots sobreviventes para a próxima fase caso o humano vença
-            window.nextRoundSurvivors = nextBracket;
-
             modalBracket.classList.remove('hidden');
         }
 
@@ -1038,7 +911,131 @@
             initGame();
         }
 
-        // 5. MOTOR DO JOGO DE DAMAS 6X6 (RED = Humano, DARK = Bot)
+        // CONTROLADORES DE TIMERS
+        function stopAllTimers() {
+            if (matchTimerInterval) clearInterval(matchTimerInterval);
+            if (turnTimerInterval) clearInterval(turnTimerInterval);
+            matchTimerInterval = null;
+            turnTimerInterval = null;
+        }
+
+        function startTimers() {
+            stopAllTimers();
+            matchTimeRemaining = MATCH_DURATION_SECONDS;
+            suddenDeathTimeRemaining = SUDDEN_DEATH_DURATION_SECONDS;
+            isSuddenDeath = false;
+            suddenDeathBadge.classList.add('hidden');
+            matchTimerLabel.textContent = "Tempo Total";
+            updateMatchTimerUI();
+
+            matchTimerInterval = setInterval(() => {
+                if (!isSuddenDeath) {
+                    matchTimeRemaining--;
+                    updateMatchTimerUI();
+                    if (matchTimeRemaining <= 0) handleMatchTimeExpired();
+                } else {
+                    suddenDeathTimeRemaining--;
+                    updateSuddenDeathTimerUI();
+                    if (suddenDeathTimeRemaining <= 0) {
+                        stopAllTimers();
+                        handleDoubleElimination();
+                    }
+                }
+            }, 1000);
+
+            resetTurnTimer();
+        }
+
+        function resetTurnTimer() {
+            if (turnTimerInterval) clearInterval(turnTimerInterval);
+            turnTimeRemaining = TURN_DURATION_SECONDS;
+            updateTurnTimerUI();
+
+            turnTimerInterval = setInterval(() => {
+                turnTimeRemaining--;
+                updateTurnTimerUI();
+                if (turnTimeRemaining <= 0) {
+                    stopAllTimers();
+                    handleTurnTimeExpired();
+                }
+            }, 1000);
+        }
+
+        function updateMatchTimerUI() {
+            const m = Math.floor(Math.max(0, matchTimeRemaining) / 60);
+            const s = Math.max(0, matchTimeRemaining) % 60;
+            matchTimerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            matchTimerDisplay.className = "text-sm sm:text-base font-black text-amber-400 font-mono";
+        }
+
+        function updateSuddenDeathTimerUI() {
+            const m = Math.floor(Math.max(0, suddenDeathTimeRemaining) / 60);
+            const s = Math.max(0, suddenDeathTimeRemaining) % 60;
+            matchTimerDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            matchTimerDisplay.className = "text-sm sm:text-base font-black text-red-400 font-mono animate-pulse";
+        }
+
+        function updateTurnTimerUI() {
+            turnTimerDisplay.textContent = `${turnTimeRemaining}s`;
+            turnTimerBar.style.width = `${(turnTimeRemaining / TURN_DURATION_SECONDS) * 100}%`;
+            turnTimerBar.className = turnTimeRemaining <= 5 ? "bg-red-500 h-full w-full" : (turnTimeRemaining <= 15 ? "bg-amber-400 h-full w-full" : "bg-sky-400 h-full w-full");
+        }
+
+        
+function handleDoubleElimination() {
+    stopAllTimers();
+    isSuddenDeath = false;
+
+    playSound('lose');
+
+    resIconBox.innerHTML = `💀`;
+    resIconBox.className = "w-16 h-16 bg-red-500/20 text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/40 text-3xl shadow-lg";
+
+    resTitle.textContent = "Dupla Eliminação!";
+    resTitle.className = "text-2xl font-black text-red-400 mb-1";
+
+    resMessage.textContent = "Ninguém capturou peças durante os 60 segundos da Morte Súbita. Você e seu adversário foram eliminados do torneio!";
+
+    resPrizeBox.classList.add('hidden');
+
+    setupResultActionButtons(false);
+
+    // Exibe o resultado da dupla eliminação
+    modalRoundResult.classList.remove('hidden');
+}
+
+
+        function handleTurnTimeExpired() {
+            const winner = currentPlayer === PLAYER_RED ? PLAYER_DARK : PLAYER_RED;
+            const msg = currentPlayer === PLAYER_RED ? "Você demorou mais de 30s e perdeu por W.O.!" : "O oponente estourou o tempo de 30s e perdeu por W.O.!";
+            handleMatchEnd(winner, msg);
+        }
+
+        function handleMatchTimeExpired() {
+            let red = 0, dark = 0;
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (boardState[r][c]?.player === PLAYER_RED) red++;
+                    if (boardState[r][c]?.player === PLAYER_DARK) dark++;
+                }
+            }
+
+            if (red > dark) {
+                handleMatchEnd(PLAYER_RED, `Tempo esgotado! Você ficou com mais peças (${red} vs ${dark}).`);
+            } else if (dark > red) {
+                handleMatchEnd(PLAYER_DARK, `Tempo esgotado! O oponente ficou com mais peças (${dark} vs ${red}).`);
+            } else {
+                isSuddenDeath = true;
+                suddenDeathTimeRemaining = SUDDEN_DEATH_DURATION_SECONDS;
+                suddenDeathBadge.classList.remove('hidden');
+                matchTimerLabel.textContent = "Morte Súbita";
+                updateSuddenDeathTimerUI();
+                showToast("Morte Súbita: Se ninguém comer peça em 60s, AMBOS serão eliminados!", 'error');
+                resetTurnTimer();
+            }
+        }
+
+        // MOTOR DE JOGO
         function initGame() {
             boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
             currentPlayer = PLAYER_RED;
@@ -1050,111 +1047,86 @@
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
                     if ((r + c) % 2 === 1) {
-                        if (r === 0 || r === 1) {
-                            boardState[r][c] = { player: PLAYER_DARK, isKing: false };
-                        } else if (r === 4 || r === 5) {
-                            boardState[r][c] = { player: PLAYER_RED, isKing: false };
-                        }
+                        if (r < 2) boardState[r][c] = { player: PLAYER_DARK, isKing: false };
+                        else if (r > 3) boardState[r][c] = { player: PLAYER_RED, isKing: false };
                     }
                 }
             }
 
             renderBoard();
             updateUI();
+            startTimers();
         }
 
         function updateUI() {
-            let redCount = 0;
-            let darkCount = 0;
-
+            let red = 0, dark = 0;
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
-                    const p = boardState[r][c];
-                    if (p) {
-                        if (p.player === PLAYER_RED) redCount++;
-                        if (p.player === PLAYER_DARK) darkCount++;
-                    }
+                    if (boardState[r][c]?.player === PLAYER_RED) red++;
+                    if (boardState[r][c]?.player === PLAYER_DARK) dark++;
                 }
             }
-
-            redScoreElem.textContent = redCount;
-            darkScoreElem.textContent = darkCount;
+            redScoreElem.textContent = red;
+            darkScoreElem.textContent = dark;
 
             if (currentPlayer === PLAYER_RED) {
-                turnBadgeElem.className = "mt-0.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-red-500/20 text-red-400 border border-red-500/30 transition-all flex items-center gap-1.5";
+                turnBadgeElem.className = "mt-0.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1.5";
                 turnTextElem.textContent = "Você";
                 playerRedCard.classList.add('bg-red-500/10', 'border-red-500/40');
                 playerDarkCard.classList.remove('bg-slate-700/50', 'border-slate-600');
             } else {
-                turnBadgeElem.className = "mt-0.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-sky-500/20 text-sky-400 border border-sky-500/30 transition-all flex items-center gap-1.5";
+                turnBadgeElem.className = "mt-0.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center gap-1.5";
                 turnTextElem.textContent = "Oponente";
                 playerDarkCard.classList.add('bg-slate-700/50', 'border-slate-600');
                 playerRedCard.classList.remove('bg-red-500/10', 'border-red-500/40');
             }
 
-            checkGameOver(redCount, darkCount);
+            if (red === 0) handleMatchEnd(PLAYER_DARK, "Todas as suas peças foram capturadas!");
+            else if (dark === 0) handleMatchEnd(PLAYER_RED, "Você capturou todas as peças adversárias!");
         }
 
         function renderBoard() {
             boardElem.innerHTML = '';
-
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
-                    const square = document.createElement('div');
+                    const sq = document.createElement('div');
                     const isDark = (r + c) % 2 === 1;
-                    
-                    square.className = `square ${isDark ? 'dark' : 'light'}`;
-                    square.dataset.row = r;
-                    square.dataset.col = c;
+                    sq.className = `square ${isDark ? 'dark' : 'light'}`;
 
                     const isHighlight = validMoves.some(m => m.row === r && m.col === c);
-                    const isCaptureMove = validMoves.some(m => m.row === r && m.col === c && m.isCapture);
-                    
+                    const isCap = validMoves.some(m => m.row === r && m.col === c && m.isCapture);
                     if (isHighlight) {
-                        square.classList.add('highlight');
-                        if (isCaptureMove) square.classList.add('highlight-capture');
+                        sq.classList.add('highlight');
+                        if (isCap) sq.classList.add('highlight-capture');
                     }
 
                     const piece = boardState[r][c];
                     if (piece) {
-                        const pieceElem = document.createElement('div');
-                        const isSelected = selectedPiece && selectedPiece.row === r && selectedPiece.col === c;
-                        
-                        pieceElem.className = `piece ${piece.player === PLAYER_RED ? 'piece-red' : 'piece-dark'}`;
-                        if (piece.isKing) pieceElem.classList.add('king');
-                        if (isSelected) pieceElem.classList.add('selected');
-
-                        if (piece.isKing) {
-                            pieceElem.innerHTML = `<i class="fa-solid fa-crown crown-icon text-amber-300 text-xs sm:text-sm"></i>`;
-                        }
-
-                        square.appendChild(pieceElem);
+                        const pEl = document.createElement('div');
+                        const isSel = selectedPiece && selectedPiece.row === r && selectedPiece.col === c;
+                        pEl.className = `piece ${piece.player === PLAYER_RED ? 'piece-red' : 'piece-dark'}`;
+                        if (piece.isKing) pEl.classList.add('king');
+                        if (isSel) pEl.classList.add('selected');
+                        if (piece.isKing) pEl.innerHTML = `<i class="fa-solid fa-crown crown-icon text-amber-300 text-xs sm:text-sm"></i>`;
+                        sq.appendChild(pEl);
                     }
 
-                    square.addEventListener('click', () => handleSquareClick(r, c));
-                    boardElem.appendChild(square);
+                    sq.addEventListener('click', () => handleSquareClick(r, c));
+                    boardElem.appendChild(sq);
                 }
             }
         }
 
         function handleSquareClick(row, col) {
             if (currentPlayer !== PLAYER_RED || isBotThinking) return;
-
             const piece = boardState[row][col];
 
             if (piece && piece.player === PLAYER_RED) {
-                if (mustCaptureChain && (selectedPiece.row !== row || selectedPiece.col !== col)) {
-                    return;
-                }
-
+                if (mustCaptureChain && (selectedPiece?.row !== row || selectedPiece?.col !== col)) return;
                 selectedPiece = { row, col };
                 validMoves = getValidMovesForPiece(row, col);
-
-                const allCaptures = getAllCapturesForPlayer(PLAYER_RED);
-                if (allCaptures.length > 0) {
-                    validMoves = validMoves.filter(m => m.isCapture);
-                }
-
+                const caps = getAllCapturesForPlayer(PLAYER_RED);
+                if (caps.length > 0) validMoves = validMoves.filter(m => m.isCapture);
                 playSound('select');
                 renderBoard();
                 return;
@@ -1162,55 +1134,51 @@
 
             if (selectedPiece) {
                 const move = validMoves.find(m => m.row === row && m.col === col);
-                if (move) {
-                    executeMove(move);
-                }
+                if (move) executeMove(move);
             }
         }
 
         function executeMove(move) {
             const { row: fromR, col: fromC } = selectedPiece;
             const { row: toR, col: toC, isCapture, capturedRow, capturedCol } = move;
-            
             const piece = boardState[fromR][fromC];
 
             boardState[toR][toC] = piece;
             boardState[fromR][fromC] = null;
 
             if (isCapture) {
+                const victim = boardState[capturedRow][capturedCol];
                 boardState[capturedRow][capturedCol] = null;
                 playSound('capture');
+
+                if (isSuddenDeath && victim) {
+                    stopAllTimers();
+                    const winner = victim.player === PLAYER_DARK ? PLAYER_RED : PLAYER_DARK;
+                    handleMatchEnd(winner, winner === PLAYER_RED ? "Você capturou na Morte Súbita!" : "Sua peça foi tomada na Morte Súbita!");
+                    return;
+                }
             } else {
                 playSound('move');
             }
 
             let promoted = false;
             if (!piece.isKing) {
-                if (piece.player === PLAYER_RED && toR === 0) {
+                if ((piece.player === PLAYER_RED && toR === 0) || (piece.player === PLAYER_DARK && toR === BOARD_SIZE - 1)) {
                     piece.isKing = true;
                     promoted = true;
-                } else if (piece.player === PLAYER_DARK && toR === BOARD_SIZE - 1) {
-                    piece.isKing = true;
-                    promoted = true;
-                }
-                if (promoted) {
                     playSound('king');
                 }
             }
 
             if (isCapture && !promoted) {
-                const multiCaptures = getValidMovesForPiece(toR, toC).filter(m => m.isCapture);
-                if (multiCaptures.length > 0) {
+                const multi = getValidMovesForPiece(toR, toC).filter(m => m.isCapture);
+                if (multi.length > 0) {
                     selectedPiece = { row: toR, col: toC };
-                    validMoves = multiCaptures;
+                    validMoves = multi;
                     mustCaptureChain = true;
                     renderBoard();
                     updateUI();
-
-                    // Se for o bot na captura múltipla, continua jogando
-                    if (currentPlayer === PLAYER_DARK) {
-                        setTimeout(triggerBotMove, 400);
-                    }
+                    if (currentPlayer === PLAYER_DARK) setTimeout(triggerBotMove, 400);
                     return;
                 }
             }
@@ -1218,299 +1186,179 @@
             mustCaptureChain = false;
             selectedPiece = null;
             validMoves = [];
-            currentPlayer = (currentPlayer === PLAYER_RED) ? PLAYER_DARK : PLAYER_RED;
+            currentPlayer = currentPlayer === PLAYER_RED ? PLAYER_DARK : PLAYER_RED;
 
+            resetTurnTimer();
             renderBoard();
             updateUI();
 
             if (!hasAnyValidMoves(currentPlayer)) {
-                const winner = currentPlayer === PLAYER_RED ? PLAYER_DARK : PLAYER_RED;
-                handleMatchEnd(winner, "O oponente não possui movimentos válidos!");
+                stopAllTimers();
+                handleMatchEnd(currentPlayer === PLAYER_RED ? PLAYER_DARK : PLAYER_RED, "O oponente ficou sem movimentos!");
                 return;
             }
 
-            // Se agora é o turno do Bot, disparar IA
             if (currentPlayer === PLAYER_DARK) {
                 isBotThinking = true;
                 setTimeout(triggerBotMove, 500);
             }
         }
 
-        // 6. INTELIGÊNCIA ARTIFICIAL DO BOT DO TORNEIO
         function triggerBotMove() {
             if (currentPlayer !== PLAYER_DARK) return;
-
-            const allCaptures = getAllCapturesForPlayer(PLAYER_DARK);
-            let availableMoves = [];
+            const caps = getAllCapturesForPlayer(PLAYER_DARK);
+            let available = [];
 
             if (mustCaptureChain && selectedPiece) {
-                availableMoves = getValidMovesForPiece(selectedPiece.row, selectedPiece.col).filter(m => m.isCapture);
-            } else if (allCaptures.length > 0) {
-                // Captura obrigatória
-                availableMoves = allCaptures;
+                available = getValidMovesForPiece(selectedPiece.row, selectedPiece.col).filter(m => m.isCapture);
+            } else if (caps.length > 0) {
+                available = caps;
             } else {
-                // Todos os movimentos normais
                 for (let r = 0; r < BOARD_SIZE; r++) {
                     for (let c = 0; c < BOARD_SIZE; c++) {
-                        const p = boardState[r][c];
-                        if (p && p.player === PLAYER_DARK) {
-                            const moves = getValidMovesForPiece(r, c);
-                            moves.forEach(m => {
-                                availableMoves.push({ ...m, fromR: r, fromC: c });
-                            });
+                        if (boardState[r][c]?.player === PLAYER_DARK) {
+                            getValidMovesForPiece(r, c).forEach(m => available.push({ ...m, fromR: r, fromC: c }));
                         }
                     }
                 }
             }
 
-            if (availableMoves.length === 0) {
-                handleMatchEnd(PLAYER_RED, "O oponente ficou sem movimentos!");
+            if (available.length === 0) {
+                stopAllTimers();
+                handleMatchEnd(PLAYER_RED, "O oponente não tem jogadas válidas!");
                 return;
             }
 
-            // Escolha inteligente da IA baseada na rodada do torneio
-            let chosenMove = null;
-
-            // Quanto maior a rodada, maior a probabilidade de escolher capturas e movimentos que promovam a Dama
-            const difficultyLevel = currentTournamentRound; // 1 a 5
-
-            if (difficultyLevel >= 3) {
-                // Priorizar promoções a Dama ou capturas
-                const kingMoves = availableMoves.filter(m => m.toR === BOARD_SIZE - 1 || m.isCapture);
-                if (kingMoves.length > 0 && Math.random() < 0.8) {
-                    chosenMove = kingMoves[Math.floor(Math.random() * kingMoves.length)];
-                }
-            }
-
-            if (!chosenMove) {
-                chosenMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-            }
-
-            selectedPiece = { row: chosenMove.fromR ?? selectedPiece.row, col: chosenMove.fromC ?? selectedPiece.col };
-            validMoves = [chosenMove];
-
+            let chosen = available[Math.floor(Math.random() * available.length)];
+            selectedPiece = { row: chosen.fromR ?? selectedPiece.row, col: chosen.fromC ?? selectedPiece.col };
+            validMoves = [chosen];
             isBotThinking = false;
-            executeMove(chosenMove);
+            executeMove(chosen);
         }
 
-        // 7. MOTOR DE MOVIMENTO E CAPTURA DE DAMAS 6X6
         function getValidMovesForPiece(r, c) {
             const piece = boardState[r][c];
             if (!piece) return [];
-
             const moves = [];
-            const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+            const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
 
             if (piece.isKing) {
-                // REGRA DA DAMA LONGA (Voadora)
-                for (let [dr, dc] of directions) {
-                    let step = 1;
-                    let foundEnemy = null;
-
+                for (let [dr, dc] of dirs) {
+                    let step = 1, foundEnemy = null;
                     while (true) {
-                        const nr = r + dr * step;
-                        const nc = c + dc * step;
-
+                        const nr = r + dr * step, nc = c + dc * step;
                         if (!isInBounds(nr, nc)) break;
-
-                        const currentCell = boardState[nr][nc];
-
+                        const curr = boardState[nr][nc];
                         if (!foundEnemy) {
-                            if (!currentCell) {
-                                moves.push({ row: nr, col: nc, isCapture: false, fromR: r, fromC: c });
-                            } else if (currentCell.player !== piece.player) {
-                                foundEnemy = { row: nr, col: nc };
-                            } else {
-                                break;
-                            }
+                            if (!curr) moves.push({ row: nr, col: nc, isCapture: false, fromR: r, fromC: c });
+                            else if (curr.player !== piece.player) foundEnemy = { row: nr, col: nc };
+                            else break;
                         } else {
-                            if (!currentCell) {
-                                moves.push({
-                                    row: nr,
-                                    col: nc,
-                                    isCapture: true,
-                                    capturedRow: foundEnemy.row,
-                                    capturedCol: foundEnemy.col,
-                                    fromR: r,
-                                    fromC: c
-                                });
-                            } else {
-                                break;
-                            }
+                            if (!curr) moves.push({ row: nr, col: nc, isCapture: true, capturedRow: foundEnemy.row, capturedCol: foundEnemy.col, fromR: r, fromC: c });
+                            else break;
                         }
-
                         step++;
                     }
                 }
             } else {
-                // REGRA DA PEÇA NORMAL
-                let forwardDirections = [];
-                if (piece.player === PLAYER_RED) {
-                    forwardDirections = [[-1, -1], [-1, 1]];
-                } else {
-                    forwardDirections = [[1, -1], [1, 1]];
+                const fDirs = piece.player === PLAYER_RED ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]];
+                for (let [dr, dc] of fDirs) {
+                    const nr = r + dr, nc = c + dc;
+                    if (isInBounds(nr, nc) && !boardState[nr][nc]) moves.push({ row: nr, col: nc, isCapture: false, fromR: r, fromC: c });
                 }
-
-                for (let [dr, dc] of forwardDirections) {
-                    const nr = r + dr;
-                    const nc = c + dc;
-                    if (isInBounds(nr, nc) && !boardState[nr][nc]) {
-                        moves.push({ row: nr, col: nc, isCapture: false, fromR: r, fromC: c });
-                    }
-                }
-
-                for (let [dr, dc] of directions) {
-                    const nr = r + dr;
-                    const nc = c + dc;
-                    const jumpR = r + 2 * dr;
-                    const jumpC = c + 2 * dc;
-
-                    if (isInBounds(jumpR, jumpC)) {
-                        const targetPiece = boardState[nr][nc];
-                        if (targetPiece && targetPiece.player !== piece.player && !boardState[jumpR][jumpC]) {
-                            moves.push({
-                                row: jumpR,
-                                col: jumpC,
-                                isCapture: true,
-                                capturedRow: nr,
-                                capturedCol: nc,
-                                fromR: r,
-                                fromC: c
-                            });
-                        }
+                for (let [dr, dc] of dirs) {
+                    const nr = r + dr, nc = c + dc;
+                    const jr = r + 2 * dr, jc = c + 2 * dc;
+                    if (isInBounds(jr, jc) && boardState[nr][nc] && boardState[nr][nc].player !== piece.player && !boardState[jr][jc]) {
+                        moves.push({ row: jr, col: jc, isCapture: true, capturedRow: nr, capturedCol: nc, fromR: r, fromC: c });
                     }
                 }
             }
-
             return moves;
         }
 
         function getAllCapturesForPlayer(player) {
-            const captures = [];
+            let caps = [];
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
-                    const p = boardState[r][c];
-                    if (p && p.player === player) {
-                        const moves = getValidMovesForPiece(r, c);
-                        const cMoves = moves.filter(m => m.isCapture);
-                        if (cMoves.length > 0) {
-                            captures.push(...cMoves);
-                        }
+                    if (boardState[r][c]?.player === player) {
+                        caps.push(...getValidMovesForPiece(r, c).filter(m => m.isCapture));
                     }
                 }
             }
-            return captures;
+            return caps;
         }
 
         function hasAnyValidMoves(player) {
-            const allCaptures = getAllCapturesForPlayer(player);
-            if (allCaptures.length > 0) return true;
-
+            if (getAllCapturesForPlayer(player).length > 0) return true;
             for (let r = 0; r < BOARD_SIZE; r++) {
                 for (let c = 0; c < BOARD_SIZE; c++) {
-                    const p = boardState[r][c];
-                    if (p && p.player === player) {
-                        const moves = getValidMovesForPiece(r, c);
-                        if (moves.length > 0) return true;
-                    }
+                    if (boardState[r][c]?.player === player && getValidMovesForPiece(r, c).length > 0) return true;
                 }
             }
             return false;
         }
 
-        function isInBounds(r, c) {
-            return r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE;
-        }
+        function isInBounds(r, c) { return r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE; }
 
-        function checkGameOver(redCount, darkCount) {
-            if (redCount === 0) {
-                handleMatchEnd(PLAYER_DARK, "Todas as suas peças foram capturadas!");
-            } else if (darkCount === 0) {
-                handleMatchEnd(PLAYER_RED, "Você capturou todas as peças do oponente!");
-            }
-        }
-
-        // 8. FINALIZAÇÃO DA PARTIDA E AVANÇO NO TORNEIO
         function handleMatchEnd(winner, reason) {
-            const isHumanWinner = winner === PLAYER_RED;
+            stopAllTimers();
+            const isHuman = winner === PLAYER_RED;
 
-            if (isHumanWinner) {
+            if (isHuman) {
                 playSound('win');
                 resIconBox.innerHTML = `🏆`;
-                resIconBox.className = "w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/40 text-3xl shadow-lg animate-bounce";
+                resIconBox.className = "w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/40 text-3xl shadow-lg";
                 resTitle.textContent = `Vitória na Rodada ${currentTournamentRound}!`;
                 resTitle.className = "text-2xl font-black text-amber-400 mb-1";
 
                 if (currentTournamentRound === TOTAL_ROUNDS) {
-                    // CAMPEÃO DO TORNEIO!
                     userBalance += PRIZE_WINNER;
                     updateBalanceDisplay();
-                    
                     resTitle.textContent = "🏆 GRANDE CAMPEÃO!";
-                    resMessage.textContent = "Você venceu as 5 rodadas do torneio e conquistou o prêmio principal!";
+                    resMessage.textContent = "Você venceu o torneio e faturou R$ 1,00!";
                     resPrizeBox.classList.remove('hidden');
-
-                    if (activeTickets > 0) {
-                        btnResAction.textContent = `Iniciar Próximo Torneio (${activeTickets} restantes)`;
-                    } else {
-                        btnResAction.textContent = "Voltar ao Menu Principal";
-                    }
-
-                    btnResAction.onclick = () => {
-                        modalRoundResult.classList.add('hidden');
-                        if (activeTickets > 0) {
-                            startNewTournament();
-                        } else {
-                            viewGame.classList.add('hidden');
-                            viewLobby.classList.remove('hidden');
-                            viewLobby.classList.add('flex');
-                        }
-                    };
                 } else {
-                    // Avançar para a próxima rodada
                     resMessage.textContent = `${reason} Você avançou para a Rodada ${currentTournamentRound + 1}!`;
                     resPrizeBox.classList.add('hidden');
-                    btnResAction.textContent = "Avançar no Torneio";
-
-                    btnResAction.onclick = () => {
-                        modalRoundResult.classList.add('hidden');
-                        currentTournamentRound++;
-                        
-                        // Atualizar chave com sobreviventes
-                        const humanObj = { id: 'human', name: 'Você (Humano)', isHuman: true };
-                        tournamentBracket = [humanObj, ...window.nextRoundSurvivors];
-
-                        showBracketModal();
-                    };
                 }
             } else {
-                // DERROTA NO TORNEIO
                 playSound('lose');
                 resIconBox.innerHTML = `❌`;
                 resIconBox.className = "w-16 h-16 bg-red-500/20 text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/40 text-3xl shadow-lg";
                 resTitle.textContent = "Eliminado do Torneio";
                 resTitle.className = "text-2xl font-black text-red-400 mb-1";
-                resMessage.textContent = `${reason} Sua jornada neste ingresso terminou na Rodada ${currentTournamentRound}.`;
+                resMessage.textContent = `${reason} Sua participação foi encerrada.`;
                 resPrizeBox.classList.add('hidden');
-
-                if (activeTickets > 0) {
-                    btnResAction.textContent = `Usar Próximo Ingresso (${activeTickets} restantes)`;
-                    btnResAction.onclick = () => {
-                        modalRoundResult.classList.add('hidden');
-                        startNewTournament();
-                    };
-                } else {
-                    btnResAction.textContent = "Voltar ao Menu Principal";
-                    btnResAction.onclick = () => {
-                        modalRoundResult.classList.add('hidden');
-                        viewGame.classList.add('hidden');
-                        viewLobby.classList.remove('hidden');
-                        viewLobby.classList.add('flex');
-                    };
-                }
             }
 
+            setupResultActionButtons(isHuman);
             modalRoundResult.classList.remove('hidden');
+        }
+
+        function setupResultActionButtons(isHuman = false) {
+            if (isHuman && currentTournamentRound < TOTAL_ROUNDS) {
+                btnResAction.textContent = "Avançar no Torneio";
+                btnResAction.onclick = () => {
+                    modalRoundResult.classList.add('hidden');
+                    currentTournamentRound++;
+                    tournamentBracket = [{ id: 'human', name: 'Você (Humano)', isHuman: true }, ...nextRoundSurvivors];
+                    showBracketModal();
+                };
+            } else if (activeTickets > 0) {
+                btnResAction.textContent = `Usar Próximo Ingresso (${activeTickets} restantes)`;
+                btnResAction.onclick = () => {
+                    modalRoundResult.classList.add('hidden');
+                    startNewTournament();
+                };
+            } else {
+                btnResAction.textContent = "Voltar ao Menu Principal";
+                btnResAction.onclick = () => {
+                    modalRoundResult.classList.add('hidden');
+                    viewGame.classList.add('hidden');
+                    viewLobby.classList.remove('hidden');
+                };
+            }
         }
     </script>
 </body>
