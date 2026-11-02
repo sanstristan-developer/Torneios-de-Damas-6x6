@@ -174,7 +174,26 @@
     <main class="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 flex flex-col justify-center items-center">
         
         <!-- MENU PRINCIPAL -->
-        <section id="view-main-menu" class="w-full max-w-2xl flex flex-col items-center gap-6 py-4">
+        <section id="view-main-menu" class="w-full max-w-2xl flex flex-col items-center gap-6 py-4 relative">
+            
+            <!-- BOTÃO REDONDO DO JOGADOR NO CANTO SUPERIOR CENTRAL DO MENU PRINCIPAL -->
+            <div class="flex flex-col items-center justify-center -mb-2">
+                <button id="btn-open-profile" class="group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-red-500 to-sky-400 shadow-xl hover:scale-105 transition-all duration-300 focus:outline-none">
+                    <div class="w-full h-full rounded-full overflow-hidden bg-slate-950 border-2 border-slate-900 relative">
+                        <img id="main-menu-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Player123" alt="Foto do Jogador" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                            <i class="fa-solid fa-gear text-lg"></i>
+                        </div>
+                    </div>
+                    <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 font-black text-[9px] uppercase px-2 py-0.5 rounded-full shadow-md border border-amber-300">
+                        Perfil
+                    </span>
+                </button>
+                <div id="main-menu-username-display" class="mt-2 text-sm font-extrabold text-amber-300 tracking-wide">
+                    Jogador
+                </div>
+            </div>
+
             <div class="w-full glass-panel rounded-3xl p-8 sm:p-10 text-center border border-amber-500/20 shadow-2xl">
                 <div class="text-5xl mb-4">🏆</div>
                 <h2 class="text-3xl sm:text-4xl font-black text-white mb-2">Menu Principal</h2>
@@ -351,13 +370,13 @@
 
                     <div id="player-red-card" class="flex items-center gap-2.5 p-2 rounded-xl transition-all border border-transparent">
                         <div class="text-right">
-                            <div class="text-xs font-bold text-red-400">Você</div>
+                            <div id="in-game-user-name" class="text-xs font-bold text-red-400 truncate max-w-[90px]">Você</div>
                             <div class="text-xs font-semibold text-slate-300">
                                 <span id="red-score">6</span> <span class="text-[10px] text-slate-400">peças</span>
                             </div>
                         </div>
-                        <div class="w-9 h-9 rounded-full piece-red border-2 border-red-300 flex items-center justify-center shadow text-xs font-bold">
-                            👑
+                        <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-red-400 shadow shrink-0">
+                            <img id="in-game-user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Player123" class="w-full h-full object-cover" alt="Foto">
                         </div>
                     </div>
                 </div>
@@ -383,7 +402,84 @@
         </section>
     </main>
 
-    <!-- MODAIS DE INTERAÇÃO -->
+    <!-- MODAL DE DADOS DA CONTA DO JOGADOR -->
+    <div id="modal-player-profile" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel border border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl text-slate-200 relative max-h-[90vh] overflow-y-auto">
+            <button id="btn-close-profile" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">&times;</button>
+            
+            <h3 class="text-xl font-black text-white mb-6 text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-id-card text-amber-400"></i> Dados da Conta do Jogador
+            </h3>
+
+            <!-- CONTAINER COM OS DADOS DE PERFIL QUE SERÁ OCULTADO AO DESVINCULAR -->
+            <div id="profile-data-container">
+                <!-- FOTO DE PERFIL & UPLOAD -->
+                <div class="flex flex-col items-center gap-3 mb-6 bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                    <div class="relative w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-red-500 to-sky-400 shadow-lg">
+                        <img id="profile-modal-avatar" src="" alt="Foto Perfil" class="w-full h-full object-cover rounded-full bg-slate-950">
+                    </div>
+                    
+                    <div class="flex flex-col items-center w-full gap-2">
+                        <span class="text-xs font-bold text-slate-300">Alterar Foto de Perfil:</span>
+                        <div class="flex items-center gap-2 w-full max-w-xs">
+                            <label class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl text-xs font-bold cursor-pointer text-center transition-all flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-upload"></i> Upload
+                                <input type="file" id="input-avatar-file" accept="image/*" class="hidden">
+                            </label>
+                            <button id="btn-avatar-url-prompt" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-link"></i> URL Foto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ID DO JOGADOR (NÃO EDITÁVEL E COPIÁVEL) -->
+                <div class="mb-5">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">ID do Jogador (Fixo)</label>
+                    <div class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-fingerprint text-slate-500 ml-1"></i>
+                        <input type="text" id="input-player-id" readonly class="bg-transparent font-mono text-sm text-amber-400 font-black flex-1 focus:outline-none cursor-default select-all" value="">
+                        <button id="btn-copy-player-id" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-lg text-xs transition-all flex items-center gap-1">
+                            <i class="fa-solid fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NOME DE USUÁRIO (ALTERÁVEL APENAS 1X POR MÊS) -->
+                <div class="mb-6 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-bold text-slate-300">Nome de Usuário</label>
+                        <span id="username-rule-tag" class="text-[10px] font-semibold text-amber-400">Altere o nome de perfil no máximo 1x a cada 30 dias</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="text" id="input-username" placeholder="Digite seu nome" class="flex-1 py-2.5 px-3 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-bold focus:outline-none focus:border-amber-500">
+                        <button id="btn-save-username" class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0">
+                            Salvar
+                        </button>
+                    </div>
+                    
+                    <div class="text-[11px] text-slate-400 flex flex-col gap-0.5">
+                        <div>Última alteração: <span id="last-name-change-date" class="font-bold text-slate-300">Nunca</span></div>
+                        <div>Próxima liberação: <span id="next-name-change-date" class="font-bold text-emerald-400">Disponível agora</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÕES DINÂMICOS: DESVINCULAR CONTA & EXCLUIR CONTA -->
+            <div class="border-t border-slate-800 pt-5 flex flex-col gap-2.5">
+                <button id="btn-toggle-link-account" class="w-full py-3 bg-red-950/50 hover:bg-red-900/70 text-red-300 border border-red-800/60 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-solid fa-link-slash"></i> Desvincular Conta
+                </button>
+                <!-- O botão de excluir conta começa oculto ou visível apenas quando vinculado, conforme a regra -->
+                <button id="btn-delete-account" class="w-full py-3 bg-red-900 hover:bg-red-800 text-white border border-red-700 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-md hidden">
+                    <i class="fa-solid fa-trash-can"></i> Excluir Conta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAIS DE INTERAÇÃO JÁ EXISTENTES -->
     <div id="modal-payment-option" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-slate-200 relative">
             <button id="btn-close-payment-option" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">&times;</button>
@@ -551,6 +647,251 @@
 
     <!-- JAVASCRIPT -->
     <script>
+        // GERENCIAMENTO DE CONTA & LOCALSTORAGE
+        const STORAGE_KEY_ACCOUNTS = 'damas_6x6_accounts_v1';
+        const STORAGE_KEY_ACTIVE_ID = 'damas_6x6_active_account_id_v1';
+
+        let userAccounts = [];
+        let activeAccount = null;
+        let isAccountLinked = true; // Estado da vinculação de conta
+
+        function generateUniqueId() {
+            return 'PLY-' + Math.floor(100000 + Math.random() * 900000);
+        }
+
+        function createDefaultAccount() {
+            const newId = generateUniqueId();
+            return {
+                id: newId,
+                username: "MestreDamas",
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${newId}`,
+                lastNameChange: null, // Timestamp da última troca
+                balance: 10.00,
+                tickets: 0
+            };
+        }
+
+        function loadAccountData() {
+            try {
+                const savedAccounts = localStorage.getItem(STORAGE_KEY_ACCOUNTS);
+                const activeId = localStorage.getItem(STORAGE_KEY_ACTIVE_ID);
+
+                if (savedAccounts) {
+                    userAccounts = JSON.parse(savedAccounts);
+                }
+
+                if (!userAccounts || userAccounts.length === 0) {
+                    const acc = createDefaultAccount();
+                    userAccounts = [acc];
+                    activeAccount = acc;
+                } else {
+                    activeAccount = userAccounts.find(a => a.id === activeId) || userAccounts[0];
+                }
+
+                saveAccountsData();
+            } catch (e) {
+                console.error("Erro ao carregar do LocalStorage:", e);
+                const acc = createDefaultAccount();
+                userAccounts = [acc];
+                activeAccount = acc;
+            }
+
+            syncGlobalVariablesWithAccount();
+            updatePlayerProfileUI();
+        }
+
+        function saveAccountsData() {
+            if (!activeAccount) return;
+            activeAccount.balance = userBalance;
+            activeAccount.tickets = activeTickets;
+
+            localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(userAccounts));
+            localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccount.id);
+        }
+
+        function syncGlobalVariablesWithAccount() {
+            if (!activeAccount) return;
+            userBalance = activeAccount.balance ?? 10.00;
+            activeTickets = activeAccount.tickets ?? 0;
+        }
+
+        function updatePlayerProfileUI() {
+            if (!activeAccount) return;
+
+            // Atualiza imagem e nome no Menu Principal
+            document.getElementById('main-menu-avatar').src = activeAccount.avatar;
+            document.getElementById('main-menu-username-display').textContent = activeAccount.username;
+
+            // Atualiza no painel de jogo
+            document.getElementById('in-game-user-name').textContent = activeAccount.username;
+            document.getElementById('in-game-user-avatar').src = activeAccount.avatar;
+
+            // Atualiza dados dentro do Modal de Perfil
+            document.getElementById('profile-modal-avatar').src = activeAccount.avatar;
+            document.getElementById('input-player-id').value = activeAccount.id;
+            document.getElementById('input-username').value = activeAccount.username;
+
+            // Cálculo da restrição de alteração de nome (1x por mês / 30 dias)
+            const lastNameChangeEl = document.getElementById('last-name-change-date');
+            const nextNameChangeEl = document.getElementById('next-name-change-date');
+            const saveUsernameBtn = document.getElementById('btn-save-username');
+            const inputUsername = document.getElementById('input-username');
+
+            if (activeAccount.lastNameChange) {
+                const lastDate = new Date(activeAccount.lastNameChange);
+                lastNameChangeEl.textContent = lastDate.toLocaleDateString('pt-BR');
+
+                const nextDate = new Date(activeAccount.lastNameChange + (30 * 24 * 60 * 60 * 1000));
+                const now = new Date();
+
+                if (now < nextDate) {
+                    nextNameChangeEl.textContent = nextDate.toLocaleDateString('pt-BR');
+                    nextNameChangeEl.className = "font-bold text-amber-400";
+                    saveUsernameBtn.disabled = true;
+                    saveUsernameBtn.className = "py-2.5 px-4 bg-slate-800 text-slate-500 font-extrabold rounded-xl text-xs cursor-not-allowed shrink-0";
+                    inputUsername.disabled = true;
+                } else {
+                    nextNameChangeEl.textContent = "Disponível agora";
+                    nextNameChangeEl.className = "font-bold text-emerald-400";
+                    saveUsernameBtn.disabled = false;
+                    saveUsernameBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0";
+                    inputUsername.disabled = false;
+                }
+            } else {
+                lastNameChangeEl.textContent = "Nunca";
+                nextNameChangeEl.textContent = "Disponível agora";
+                nextNameChangeEl.className = "font-bold text-emerald-400";
+                saveUsernameBtn.disabled = false;
+                saveUsernameBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0";
+                inputUsername.disabled = false;
+            }
+        }
+
+        // LÓGICA DE ALTERNÂNCIA DO BOTÃO E EXIBIÇÃO DOS DADOS DE PERFIL
+        function toggleAccountLink() {
+            const dataContainer = document.getElementById('profile-data-container');
+            const btnToggle = document.getElementById('btn-toggle-link-account');
+            const btnDelete = document.getElementById('btn-delete-account');
+
+            if (isAccountLinked) {
+                // Conta foi DESVINCULADA:
+                // 1. Ocultar dados do perfil
+                dataContainer.classList.add('hidden');
+                
+                // 2. Ocultar o botão de excluir conta (conforme regra: "o botão de excluir conta não é mais necessário quando o jogador desvincular conta")
+                btnDelete.classList.add('hidden');
+
+                // 3. Transformar o botão principal em "Vincular Conta Google"
+                isAccountLinked = false;
+                btnToggle.className = "w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white border border-sky-400/50 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-lg";
+                btnToggle.innerHTML = `<i class="fa-brands fa-google text-white text-sm"></i> Vincular Conta Google`;
+                
+                showToast("Conta desvinculada.", 'info');
+            } else {
+                // O usuário CLICOU em "Vincular Conta Google":
+                // 1. Restaurar dados do perfil
+                dataContainer.classList.remove('hidden');
+                
+                // 2. Reexibir o botão de excluir conta ("ele só deve aparecer depois que for clicado em vincular conta")
+                btnDelete.classList.remove('hidden');
+
+                // 3. Retornar o botão principal para "Desvincular Conta"
+                isAccountLinked = true;
+                btnToggle.className = "w-full py-3 bg-red-950/50 hover:bg-red-900/70 text-red-300 border border-red-800/60 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-md";
+                btnToggle.innerHTML = `<i class="fa-solid fa-link-slash"></i> Desvincular Conta`;
+
+                showToast("Conta Google vinculada com sucesso!", 'success');
+            }
+        }
+
+        // LÓGICA DE EXCLUSÃO DE CONTA
+        function deletePlayerAccount() {
+            if (confirm("Tem certeza que deseja excluir sua conta permanentemente? Todos os seus dados, saldo e ingressos serão perdidos.")) {
+                localStorage.removeItem(STORAGE_KEY_ACCOUNTS);
+                localStorage.removeItem(STORAGE_KEY_ACTIVE_ID);
+
+                // Recriar nova conta padrão limpa
+                const acc = createDefaultAccount();
+                userAccounts = [acc];
+                activeAccount = acc;
+                saveAccountsData();
+                syncGlobalVariablesWithAccount();
+                updateBalanceDisplay();
+                updatePlayerProfileUI();
+
+                // Fechar o modal de perfil e retornar ao menu principal
+                document.getElementById('modal-player-profile').classList.add('hidden');
+                showMainMenu();
+                showToast("Conta excluída e redefinida com sucesso.", 'success');
+            }
+        }
+
+        function copyPlayerIdToClipboard() {
+            const input = document.getElementById('input-player-id');
+            input.select();
+            document.execCommand('copy');
+            showToast("ID do jogador copiado!", 'success');
+        }
+
+        function saveNewUsername() {
+            const input = document.getElementById('input-username');
+            const newName = input.value.trim();
+
+            if (!newName) {
+                showToast("Digite um nome de usuário válido!", 'error');
+                return;
+            }
+
+            if (newName.length < 3 || newName.length > 20) {
+                showToast("O nome deve ter entre 3 e 20 caracteres.", 'error');
+                return;
+            }
+
+            const now = Date.now();
+            if (activeAccount.lastNameChange) {
+                const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+                if (now - activeAccount.lastNameChange < thirtyDaysMs) {
+                    showToast("Você só pode alterar seu nome uma vez por mês!", 'error');
+                    return;
+                }
+            }
+
+            activeAccount.username = newName;
+            activeAccount.lastNameChange = now;
+            saveAccountsData();
+            updatePlayerProfileUI();
+            showToast("Nome de usuário atualizado!", 'success');
+        }
+
+        function handleAvatarFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast("Selecione um arquivo de imagem válido.", 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                activeAccount.avatar = evt.target.result;
+                saveAccountsData();
+                updatePlayerProfileUI();
+                showToast("Foto de perfil atualizada!", 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleAvatarUrlPrompt() {
+            const url = prompt("Insira a URL da nova foto de perfil:", activeAccount.avatar);
+            if (url && url.trim()) {
+                activeAccount.avatar = url.trim();
+                saveAccountsData();
+                updatePlayerProfileUI();
+                showToast("Foto de perfil atualizada!", 'success');
+            }
+        }
+
         // ECONOMIA & TORNEIO
         let userBalance = 10.00;
         let activeTickets = 0;
@@ -582,7 +923,6 @@
         let mustCaptureChain = false;
         let soundEnabled = true;
         let isBotThinking = false;
-        // Impede que o encerramento da mesma partida seja processado mais de uma vez.
         let matchEndHandled = false;
 
         const MATCH_DURATION_SECONDS = 90;
@@ -721,9 +1061,11 @@
         let modalPaymentOption, modalPixCheckout, modalBracket, bracketMatchesList, bracketModalRoundTag, btnStartNextRound;
         let modalAutoLoading;
         let modalRoundResult, resIconBox, resTitle, resMessage, resPrizeBox, resActionContainer, modalWithdraw, modalRules;
+        let modalPlayerProfile;
 
         window.onload = function() {
             bindDOMElements();
+            loadAccountData();
             updateBalanceDisplay();
             setupEventListeners();
         };
@@ -772,6 +1114,7 @@
 
             modalWithdraw = document.getElementById('modal-withdraw');
             modalRules = document.getElementById('modal-rules');
+            modalPlayerProfile = document.getElementById('modal-player-profile');
         }
 
         function showToast(message, type = 'info') {
@@ -796,6 +1139,21 @@
         }
 
         function setupEventListeners() {
+            // Perfil do Jogador
+            document.getElementById('btn-open-profile').addEventListener('click', () => {
+                updatePlayerProfileUI();
+                modalPlayerProfile.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-profile').addEventListener('click', () => modalPlayerProfile.classList.add('hidden'));
+            document.getElementById('btn-copy-player-id').addEventListener('click', copyPlayerIdToClipboard);
+            document.getElementById('btn-save-username').addEventListener('click', saveNewUsername);
+            document.getElementById('input-avatar-file').addEventListener('change', handleAvatarFileUpload);
+            document.getElementById('btn-avatar-url-prompt').addEventListener('click', handleAvatarUrlPrompt);
+            
+            // Evento dos botões de vínculo e exclusão
+            document.getElementById('btn-toggle-link-account').addEventListener('click', toggleAccountLink);
+            document.getElementById('btn-delete-account').addEventListener('click', deletePlayerAccount);
+
             document.getElementById('btn-enter-tournament').addEventListener('click', startNewTournament);
             document.getElementById('btn-open-ticket-shop').addEventListener('click', showTicketPurchase);
             document.getElementById('btn-no-tickets-back').addEventListener('click', showMainMenu);
@@ -871,6 +1229,7 @@
             }
             userBalance -= total;
             activeTickets += qty;
+            saveAccountsData();
             updateBalanceDisplay();
             modalPaymentOption.classList.add('hidden');
             showToast(`${qty} Ingresso(s) adquirido(s)!`, 'success');
@@ -885,6 +1244,7 @@
         function processPixPayment() {
             let qty = parseInt(inputTicketQty.value) || 1;
             activeTickets += qty;
+            saveAccountsData();
             updateBalanceDisplay();
             modalPixCheckout.classList.add('hidden');
             playSound('win');
@@ -901,6 +1261,7 @@
                 return;
             }
             userBalance -= amount;
+            saveAccountsData();
             updateBalanceDisplay();
             modalWithdraw.classList.add('hidden');
             playSound('win');
@@ -937,11 +1298,12 @@
             viewNoTickets.classList.add('hidden');
             viewNoTickets.classList.remove('flex');
             activeTickets--;
+            saveAccountsData();
             updateBalanceDisplay();
 
             currentTournamentRound = 1;
             let shuffled = [...BOT_NAMES].sort(() => Math.random() - 0.5);
-            tournamentBracket = [{ id: 'human', name: 'Você (Humano)', isHuman: true }];
+            tournamentBracket = [{ id: 'human', name: `${activeAccount?.username || 'Você'}`, isHuman: true }];
             for (let i = 0; i < 31; i++) {
                 tournamentBracket.push({ id: `bot_${i}`, name: shuffled[i], isHuman: false });
             }
@@ -1119,7 +1481,6 @@
 
         // MOTOR DE JOGO
         function initGame() {
-            // Libera o encerramento somente para a nova partida.
             matchEndHandled = false;
             boardState = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
             currentPlayer = PLAYER_RED;
@@ -1385,11 +1746,7 @@
 
         function isInBounds(r, c) { return r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE; }
 
-        // FIM DE PARTIDA COM TELA DE CARREGAMENTO AUTOMÁTICA DE 5 SEGUNDOS (CORRIGIDO)
-        // FIM DE PARTIDA COM TELA DE CARREGAMENTO AUTOMÁTICA DE 5 SEGUNDOS (CORRIGIDO)
         function handleMatchEnd(winner, reason) {
-            // Timers e verificações do tabuleiro podem detectar o mesmo fim simultaneamente.
-            // Processa a vitória/derrota apenas uma vez por partida.
             if (matchEndHandled) return;
             matchEndHandled = true;
 
@@ -1400,16 +1757,12 @@
                 playSound('win');
                 
                 if (currentTournamentRound < TOTAL_ROUNDS) {
-                    // Exibe a tela de carregamento automática por 5 segundos
                     modalAutoLoading.classList.remove('hidden');
 
                     setTimeout(() => {
                         modalAutoLoading.classList.add('hidden');
-
-                        // Incrementa a ronda exatamente uma vez por vitória
                         currentTournamentRound++;
                         
-                        // Simula os sobreviventes da rodada anterior para atualizar o chaveamento
                         let updatedSurvivors = [];
                         for (let i = 0; i < tournamentBracket.length; i += 2) {
                             const p1 = tournamentBracket[i];
@@ -1422,20 +1775,18 @@
                             }
                         }
                         
-                        tournamentBracket = [{ id: 'human', name: 'Você (Humano)', isHuman: true }, ...updatedSurvivors];
+                        tournamentBracket = [{ id: 'human', name: `${activeAccount?.username || 'Você'}`, isHuman: true }, ...updatedSurvivors];
                         
-                        // Atualiza a interface gráfica e o nível do oponente atual
                         updateProgressBar();
                         botNameElem.textContent = `${tournamentBracket[1].name} (Nível ${currentTournamentRound})`;
 
-                        // Inicia a próxima ronda de forma limpa e sequencial
                         initGame();
                     }, 5000);
 
                     return;
                 } else {
-                    // Vitória na Grande Final (Rodada 5) - Fim do Torneio
                     userBalance += PRIZE_WINNER;
+                    saveAccountsData();
                     updateBalanceDisplay();
                     
                     resIconBox.innerHTML = `🏆`;
@@ -1449,7 +1800,6 @@
                     modalRoundResult.classList.remove('hidden');
                 }
             } else {
-                // Derrota / Eliminação
                 playSound('lose');
                 resIconBox.innerHTML = `❌`;
                 resIconBox.className = "w-16 h-16 bg-red-500/20 text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/40 text-3xl shadow-lg";
@@ -1462,6 +1812,7 @@
                 modalRoundResult.classList.remove('hidden');
             }
         }
+
         function setupResultActionButtons(isChampion = false) {
             resActionContainer.innerHTML = '';
 
