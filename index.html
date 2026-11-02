@@ -223,7 +223,14 @@
                     <i class="fa-solid fa-ticket"></i>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-black text-white mb-3">Você precisa de um ingresso</h2>
-                <p class="text-sm text-slate-300 mb-6">Para participar de torneios, você deve comprar ingressos primeiro. Volte ao menu principal e escolha a opção “Comprar Ingressos”.</p>
+                <p class="text-sm text-slate-300 mb-4">Você pode conseguir ingresso de duas formas:</p>
+                <div class="text-sm text-slate-300 text-left bg-slate-900/70 border border-slate-700 rounded-xl p-4 mb-5 space-y-3">
+                    <p><strong class="text-amber-300">1. Comprar ingressos:</strong> no menu principal, escolha a opção “Comprar Ingressos”.</p>
+                    <p><strong class="text-amber-300">2. Convidar alguém:</strong> compartilhe o seu link de convite com alguém que não tem conta no site e ganhe 3 ingressos após ela fazer uma conta.</p>
+                </div>
+                <button id="btn-copy-invite-link" class="w-full max-w-xs mb-3 py-3 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all">
+                    <i class="fa-solid fa-link mr-2"></i> Copiar link de convite
+                </button>
                 <button id="btn-no-tickets-back" class="w-full max-w-xs py-3 px-6 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all">
                     <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
                 </button>
@@ -1171,6 +1178,22 @@
             document.getElementById('input-friend-id').addEventListener('keydown', e => { if (e.key === 'Enter') submitFriendChallenge(); });
             document.getElementById('btn-open-ticket-shop').addEventListener('click', showTicketPurchase);
             document.getElementById('btn-no-tickets-back').addEventListener('click', showMainMenu);
+            document.getElementById('btn-copy-invite-link').addEventListener('click', async () => {
+                const inviteUrl = new URL(window.location.href);
+                inviteUrl.searchParams.set('ref', activeAccount.id);
+                try {
+                    await navigator.clipboard.writeText(inviteUrl.toString());
+                    showToast("Link de convite copiado!", 'success');
+                } catch (e) {
+                    const temp = document.createElement('textarea');
+                    temp.value = inviteUrl.toString();
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    temp.remove();
+                    showToast("Link de convite copiado!", 'success');
+                }
+            });
             document.getElementById('btn-back-main-menu').addEventListener('click', showMainMenu);
             inputTicketQty.addEventListener('input', calculateTicketCost);
             document.getElementById('btn-qty-minus').addEventListener('click', () => {
