@@ -453,26 +453,28 @@
                     </div>
                 </div>
 
+                <!-- CAMPO: ID DO JOGADOR -->
                 <div class="mb-5">
                     <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">ID do Jogador (Fixo)</label>
-                    <div class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                        <i class="fa-solid fa-fingerprint text-slate-500 ml-1"></i>
-                        <input type="text" id="input-player-id" readonly class="bg-transparent font-mono text-sm text-amber-400 font-black flex-1 focus:outline-none cursor-default select-all" value="">
-                        <button id="btn-copy-player-id" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-lg text-xs transition-all flex items-center gap-1">
+                    <div class="flex items-center bg-slate-950 p-1.5 pl-3 rounded-xl border border-slate-800 w-full">
+                        <i class="fa-solid fa-fingerprint text-slate-500 mr-2 shrink-0"></i>
+                        <input type="text" id="input-player-id" readonly class="bg-transparent font-mono text-sm text-amber-400 font-black min-w-0 flex-1 focus:outline-none cursor-default select-all" value="">
+                        <button id="btn-copy-player-id" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-lg text-xs transition-all shrink-0 flex items-center gap-1">
                             <i class="fa-solid fa-copy"></i> Copiar
                         </button>
                     </div>
                 </div>
 
+                <!-- CAMPO: NOME DE USUÁRIO -->
                 <div class="mb-6 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
                     <div class="flex justify-between items-center mb-1">
                         <label class="text-xs font-bold text-slate-300">Nome de Usuário (máx. 10 caracteres)</label>
                         <span id="username-rule-tag" class="text-[10px] font-semibold text-amber-400">Máx 1x a cada 30 dias</span>
                     </div>
                     
-                    <div class="flex items-center gap-2 mb-2">
-                        <input type="text" id="input-username" maxlength="10" placeholder="Digite seu nome" class="flex-1 py-2.5 px-3 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-bold focus:outline-none focus:border-amber-500">
-                        <button id="btn-save-username" class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0">
+                    <div class="flex items-center bg-slate-950 p-1.5 pl-3 rounded-xl border border-slate-700 w-full mb-2">
+                        <input type="text" id="input-username" maxlength="10" placeholder="Digite seu nome" class="bg-transparent text-white text-sm font-bold min-w-0 flex-1 focus:outline-none">
+                        <button id="btn-save-username" class="py-1.5 px-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-lg text-xs transition-all shrink-0">
                             Salvar
                         </button>
                     </div>
@@ -573,12 +575,19 @@
             </div>
             <p class="text-xs text-slate-300">Acompanhe os confrontos do torneio:</p>
             <div id="bracket-matches-list" class="max-h-60 overflow-y-auto space-y-2 pr-1 text-xs"></div>
-            <button id="btn-start-next-round" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-xl shadow-lg transition-all text-sm mt-2 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-play"></i> Jogar Minha Partida Agora!
-            </button>
+            
+            <div class="flex flex-col gap-2 mt-2">
+                <button id="btn-start-next-round" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> Jogar Minha Partida Agora!
+                </button>
+                <!-- NOVO BOTÃO DE VOLTAR AO MENU NA TELA DE CHAVEAMENTO -->
+                <button id="btn-bracket-back-menu" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold rounded-xl transition-all text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Menu Principal
+                </button>
+            </div>
         </div>
     </div>
-
+    
     <!-- TELA DE CARREGAMENTO AUTOMÁTICO -->
     <div id="modal-auto-loading" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
         <div class="glass-panel border-2 border-emerald-500/40 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center transform transition-all flex flex-col items-center">
@@ -1243,6 +1252,11 @@
                 modalBracket.classList.add('hidden');
                 startActualMatch();
             });
+            
+            document.getElementById('btn-bracket-back-menu').addEventListener('click', () => {
+    modalBracket.classList.add('hidden');
+    showMainMenu();
+});
         }
 
         async function initializeFriendBackend() {
