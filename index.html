@@ -705,16 +705,17 @@
         }
 
         function createDefaultAccount() {
-            const newId = generateUniqueId();
-            return {
-                id: newId,
-                username: "MestreDama",
-                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${newId}`,
-                lastNameChange: null,
-                balance: 10.00,
-                tickets: 0
-            };
-        }
+    const newId = generateUniqueId();
+    return {
+        id: newId,
+        username: "",
+        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${newId}`,
+        lastNameChange: null,
+        balance: 10.00,
+        tickets: 0,
+        googleLinked: false // Garante que contas novas/primeiro acesso venham desvinculadas
+    };
+}
 
         function loadAccountData() {
             try {
@@ -761,74 +762,106 @@
         }
 
         function updatePlayerProfileUI() {
-            if (!activeAccount) return;
+    if (!activeAccount) return;
 
-            document.getElementById('main-menu-avatar').src = activeAccount.avatar;
-            document.getElementById('main-menu-username-display').textContent = activeAccount.username;
+    // Se a propriedade googleLinked não existir na conta carregada, define como true por padrão
+    if (activeAccount.googleLinked === undefined) {
+        activeAccount.googleLinked = true;
+    }
 
-            document.getElementById('in-game-user-name').textContent = activeAccount.username;
-            document.getElementById('in-game-user-avatar').src = activeAccount.avatar;
+    document.getElementById('main-menu-avatar').src = activeAccount.avatar;
+    document.getElementById('main-menu-username-display').textContent = activeAccount.username || 'Jogador';
 
-            document.getElementById('profile-modal-avatar').src = activeAccount.avatar;
-            document.getElementById('input-player-id').value = activeAccount.id;
-            document.getElementById('input-username').value = activeAccount.username;
+    document.getElementById('in-game-user-name').textContent = activeAccount.username || 'Você';
+    document.getElementById('in-game-user-avatar').src = activeAccount.avatar;
 
-            const lastNameChangeEl = document.getElementById('last-name-change-date');
-            const nextNameChangeEl = document.getElementById('next-name-change-date');
-            const saveUsernameBtn = document.getElementById('btn-save-username');
-            const inputUsername = document.getElementById('input-username');
+    document.getElementById('profile-modal-avatar').src = activeAccount.avatar;
+    document.getElementById('input-player-id').value = activeAccount.id;
+    document.getElementById('input-username').value = activeAccount.username || '';
+    document.getElementById('input-username').placeholder = 'Ex.: Jogador123';
 
-            if (activeAccount.lastNameChange) {
-                const lastDate = new Date(activeAccount.lastNameChange);
-                lastNameChangeEl.textContent = lastDate.toLocaleDateString('pt-BR');
+    const lastNameChangeEl = document.getElementById('last-name-change-date');
+    const nextNameChangeEl = document.getElementById('next-name-change-date');
+    const saveUsernameBtn = document.getElementById('btn-save-username');
+    const inputUsername = document.getElementById('input-username');
 
-                const nextDate = new Date(activeAccount.lastNameChange + (30 * 24 * 60 * 60 * 1000));
-                const now = new Date();
+    // Controla o botão de excluir e o container de dados baseado na conta ativa
+    const deleteAccountBtn = document.getElementById('btn-delete-account');
+    const dataContainer = document.getElementById('profile-data-container');
+    const btnToggle = document.getElementById('btn-toggle-link-account');
 
-                if (now < nextDate) {
-                    nextNameChangeEl.textContent = nextDate.toLocaleDateString('pt-BR');
-                    nextNameChangeEl.className = "font-bold text-amber-400";
-                    saveUsernameBtn.disabled = true;
-                    saveUsernameBtn.className = "py-2.5 px-4 bg-slate-800 text-slate-500 font-extrabold rounded-xl text-xs cursor-not-allowed shrink-0";
-                    inputUsername.disabled = true;
-                } else {
-                    nextNameChangeEl.textContent = "Disponível agora";
-                    nextNameChangeEl.className = "font-bold text-emerald-400";
-                    saveUsernameBtn.disabled = false;
-                    saveUsernameBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0";
-                    inputUsername.disabled = false;
-                }
-            } else {
-                lastNameChangeEl.textContent = "Nunca";
-                nextNameChangeEl.textContent = "Disponível agora";
-                nextNameChangeEl.className = "font-bold text-emerald-400";
-                saveUsernameBtn.disabled = false;
-                saveUsernameBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0";
-                inputUsername.disabled = false;
-            }
+    if (deleteAccountBtn) {
+        deleteAccountBtn.classList.toggle('hidden', !activeAccount.googleLinked);
+    }
+
+    if (dataContainer) {
+        dataContainer.classList.toggle('hidden', !activeAccount.googleLinked);
+    }
+
+    if (btnToggle) {
+        if (activeAccount.googleLinked) {
+            btnToggle.className = "w-full py-3 bg-red-950/50 hover:bg-red-900/70 text-red-300 border border-red-800/60 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-md";
+            btnToggle.innerHTML = `<i class="fa-solid fa-link-slash"></i> Desvincular Conta`;
+        } else {
+            btnToggle.className = "w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white border border-sky-400/50 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-lg";
+            btnToggle.innerHTML = `<i class="fa-brands fa-google text-white text-sm"></i> Vincular Conta Google`;
         }
+    }
 
+    // Restante da lógica de data de alteração de nome...
+    if (activeAccount.lastNameChange) {
+        const lastDate = new Date(activeAccount.lastNameChange);
+        lastNameChangeEl.textContent = lastDate.toLocaleDateString('pt-BR');
+
+        const nextDate = new Date(activeAccount.lastNameChange + (30 * 24 * 60 * 60 * 1000));
+        const now = new Date();
+
+        if (now < nextDate) {
+            nextNameChangeEl.textContent = nextDate.toLocaleDateString('pt-BR');
+            nextNameChangeEl.className = "font-bold text-amber-400";
+            saveUsernameBtn.disabled = true;
+            saveUsernameBtn.className = "py-2.5 px-4 bg-slate-800 text-slate-500 font-extrabold rounded-xl text-xs cursor-not-allowed shrink-0";
+            inputUsername.disabled = true;
+        } else {
+            nextNameChangeEl.textContent = "Disponível agora";
+            nextNameChangeEl.className = "font-bold text-emerald-400";
+            saveUsernameBtn.disabled = false;
+            saveUsernameBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0";
+            inputUsername.disabled = false;
+        }
+    } else {
+        lastNameChangeEl.textContent = "Nunca";
+        nextNameChangeEl.textContent = "Disponível agora";
+        nextNameChangeEl.className = "font-bold text-emerald-400";
+        saveUsernameBtn.disabled = false;
+        saveUsernameBtn.className = "py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs transition-all shrink-0";
+        inputUsername.disabled = false;
+    }
+}
         function toggleAccountLink() {
-            const dataContainer = document.getElementById('profile-data-container');
-            const btnToggle = document.getElementById('btn-toggle-link-account');
-            const btnDelete = document.getElementById('btn-delete-account');
+    if (!activeAccount) return;
 
-            if (isAccountLinked) {
-                dataContainer.classList.add('hidden');
-                btnDelete.classList.add('hidden');
-                isAccountLinked = false;
-                btnToggle.className = "w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white border border-sky-400/50 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-lg";
-                btnToggle.innerHTML = `<i class="fa-brands fa-google text-white text-sm"></i> Vincular Conta Google`;
-                showToast("Conta desvinculada.", 'info');
-            } else {
-                dataContainer.classList.remove('hidden');
-                btnDelete.classList.remove('hidden');
-                isAccountLinked = true;
-                btnToggle.className = "w-full py-3 bg-red-950/50 hover:bg-red-900/70 text-red-300 border border-red-800/60 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-md";
-                btnToggle.innerHTML = `<i class="fa-solid fa-link-slash"></i> Desvincular Conta`;
-                showToast("Conta Google vinculada com sucesso!", 'success');
-            }
-        }
+    // Alterna o estado atual
+    activeAccount.googleLinked = !activeAccount.googleLinked;
+    
+    // Salva as alterações no localStorage
+    saveAccountsData();
+    
+    // Atualiza a interface da modal refletindo o novo estado imediatamente
+    updatePlayerProfileUI();
+
+    if (!activeAccount.googleLinked) {
+        // Se desvinculou: esconde o botão "X" de fechar para forçar a tela de login/vínculo
+        document.getElementById('btn-close-profile').classList.add('hidden');
+        showToast("Conta desvinculada.", 'info');
+    } else {
+        // Se vinculou: mostra o botão "X" novamente e limpa os campos
+        document.getElementById('btn-close-profile').classList.remove('hidden');
+        document.getElementById('input-username').value = '';
+        document.getElementById('input-username').placeholder = 'Ex.: Jogador123';
+        showToast("Conta Google vinculada com sucesso!", 'success');
+    }
+}
 
         function deletePlayerAccount() {
             if (confirm("Tem certeza que deseja excluir sua conta permanentemente? Todos os seus dados, saldo e ingressos serão perdidos.")) {
@@ -1089,12 +1122,29 @@
         let modalPlayerProfile;
 
         window.onload = function() {
-            bindDOMElements();
-            loadAccountData();
-            updateBalanceDisplay();
-            setupEventListeners();
-            initializeFriendBackend();
-        };
+    bindDOMElements();
+    loadAccountData();
+    updateBalanceDisplay();
+    setupEventListeners();
+
+    // Se for o primeiro acesso ou a conta estiver desvinculada
+    if (activeAccount && activeAccount.googleLinked === false) {
+        isAccountLinked = false;
+        const dataContainer = document.getElementById('profile-data-container');
+        if (dataContainer) dataContainer.classList.add('hidden');
+        
+        const linkBtn = document.getElementById('btn-toggle-link-account');
+        if (linkBtn) {
+            linkBtn.className = "w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white border border-sky-400/50 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-lg";
+            linkBtn.innerHTML = '<i class="fa-brands fa-google text-white text-sm"></i> Vincular Conta Google';
+        }
+        
+        const closeBtn = document.getElementById('btn-close-profile');
+        if (closeBtn) closeBtn.classList.add('hidden');
+        
+        modalPlayerProfile.classList.remove('hidden');
+    }
+};
 
         function bindDOMElements() {
             viewMainMenu = document.getElementById('view-main-menu');
