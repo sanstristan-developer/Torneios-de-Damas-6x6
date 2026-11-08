@@ -1640,27 +1640,21 @@
                 if (room.status === 'waiting' && other?.uid) {
                     await startFriendRoom(room, slot);
                 }
-                // Dentro da função listenFriendRoom, procure por algo parecido com isto:
-if (room.status === 'playing' && room.game && friendMode) {
-    const g = room.game;
-    if (g.revision !== friendLastRevision) {
-        friendLastRevision = g.revision || 0;
-        
-        
-        if (g.board) {
-            boardState = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
-        }
-        
-        currentPlayer = g.currentPlayer || currentPlayer;
-        isSuddenDeath = !!g.isSuddenDeath;
-        matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
-        suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
-        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
-        renderBoard(); updateUI();
-        if (!matchTimerInterval) startTimers();
-        else if (currentPlayer === friendSide) resetTurnTimer();
-    }
-}
+                if (room.status === 'playing' && room.game && friendMode) {
+                    const g = room.game;
+                    if (g.revision !== friendLastRevision) {
+                        friendLastRevision = g.revision || 0;
+                        boardState = g.board || boardState;
+                        currentPlayer = g.currentPlayer || currentPlayer;
+                        isSuddenDeath = !!g.isSuddenDeath;
+                        matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
+                        suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
+                        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
+                        renderBoard(); updateUI();
+                        if (!matchTimerInterval) startTimers();
+                        else if (currentPlayer === friendSide) resetTurnTimer();
+                    }
+                }
                 if (room.status === 'finished' && friendMode && room.result && !matchEndHandled) {
                     const winner = room.result.winner;
                     matchEndHandled = true; stopAllTimers();
@@ -1722,21 +1716,16 @@ if (room.status === 'playing' && room.game && friendMode) {
         isSuddenDeath: false, 
         matchTimeRemaining: MATCH_DURATION_SECONDS, 
         suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS, 
-        mustCaptureChain: false });
+        mustCaptureChain: false 
+    });
                     }
             }
-            
-const started = (await friendRoomRef.once('value')).val();
-if (started?.game) {
-    
-        if (started.game.board) {
-        boardState = typeof started.game.board === 'string' ? JSON.parse(started.game.board) : started.game.board;
-    }
-    
-    currentPlayer = started.game.currentPlayer;
-    friendLastRevision = started.game.revision || 0;
-    renderBoard(); updateUI(); startTimers();
-}
+            const started = (await friendRoomRef.once('value')).val();
+            if (started?.game) {
+                boardState = started.game.board; currentPlayer = started.game.currentPlayer;
+                friendLastRevision = started.game.revision || 0;
+                renderBoard(); updateUI(); startTimers();
+            }
         }
 
         function createFriendInitialBoard() {
@@ -1751,24 +1740,16 @@ if (started?.game) {
         }
 
         async function publishFriendGameState() {
-    if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
-    friendRoomUpdating = true;
-    try {
-        const snap = await friendRoomRef.child('game/revision').once('value');
-        const revision = Math.max(Date.now(), (snap.val() || 0) + 1);
-        friendLastRevision = revision;
-        await friendRoomRef.child('game').update({ 
-            board: JSON.stringify(boardState), // <-- Envia serializado
-            currentPlayer, 
-            revision, 
-            isSuddenDeath, 
-            matchTimeRemaining, 
-            suddenDeathTimeRemaining, 
-            mustCaptureChain 
-        });
-    } catch (e) { console.error('Falha ao sincronizar jogada:', e); }
-    finally { friendRoomUpdating = false; }
-}
+            if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
+            friendRoomUpdating = true;
+            try {
+                const snap = await friendRoomRef.child('game/revision').once('value');
+                const revision = Math.max(Date.now(), (snap.val() || 0) + 1);
+                friendLastRevision = revision;
+                await friendRoomRef.child('game').update({ board: boardState, currentPlayer, revision, isSuddenDeath, matchTimeRemaining, suddenDeathTimeRemaining, mustCaptureChain });
+            } catch (e) { console.error('Falha ao sincronizar jogada:', e); }
+            finally { friendRoomUpdating = false; }
+        }
 
         async function finishFriendMatch(winner, reason) {
             if (!friendMode || friendLocalEnd) return;
