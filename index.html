@@ -1618,11 +1618,13 @@
                 const otherSlot = slot === 'A' ? 'B' : 'A';
                 const myPlayer = { id: activeAccount.id, username: activeAccount.username, uid: friendAuthUid };
                 await friendRoomRef.child('player' + slot).set(myPlayer);
+                // Começa a escutar antes de tentar iniciar: assim, nenhuma mudança
+                // de status/tabuleiro é perdida durante a entrada do segundo jogador.
+                listenFriendRoom(slot);
                 const latest = (await friendRoomRef.once('value')).val();
                 if (latest?.['player' + otherSlot]?.uid) {
                     await startFriendRoom(latest, slot);
                 }
-                listenFriendRoom(slot);
             } catch (error) {
                 console.error(error);
                 showToast("Não foi possível criar ou entrar na sala. Verifique a conexão.", "error");
@@ -1644,7 +1646,10 @@
                     const g = room.game;
                     if (g.revision !== friendLastRevision) {
                         friendLastRevision = g.revision || 0;
-                        boardState = typeof g.board === 'string' ? JSON.parse(g.board) : (g.board || boardState);
+                        const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
+                        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
+                            boardState = receivedBoard;
+                        }
                         currentPlayer = g.currentPlayer || currentPlayer;
                         isSuddenDeath = !!g.isSuddenDeath;
                         matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
@@ -1676,14 +1681,26 @@
         }
 
         let friendLastRevision = 0;
+        let friendStarting = false;
         async function startFriendRoom(room, slot) {
-            if (friendMode) return;
+            if (friendMode || friendStarting) return;
             const me = room['player' + slot];
             const other = room[slot === 'A' ? 'playerB' : 'playerA'];
             if (!me?.uid || !other?.uid) return;
+            friendStarting = true;
             friendMode = true;
             isPracticeMode = false;
             friendSide = slot === 'A' ? PLAYER_RED : PLAYER_DARK;
+            // Renderiza uma posição inicial local imediatamente; o estado oficial
+            // será recebido do Firebase logo em seguida.
+            boardState = createFriendInitialBoard();
+            currentPlayer = PLAYER_RED;
+            selectedPiece = null;
+            validMoves = [];
+            mustCaptureChain = false;
+            isSuddenDeath = false;
+            matchTimeRemaining = MATCH_DURATION_SECONDS;
+            suddenDeathTimeRemaining = SUDDEN_DEATH_DURATION_SECONDS;
             friendOpponent = other;
             friendLocalEnd = false;
             document.getElementById('view-friend-match').classList.add('hidden');
@@ -1704,15 +1721,16 @@
             if (friendSide === PLAYER_DARK) {
                 document.getElementById('player-red-card').querySelector('#in-game-user-name').textContent = (other.username || 'Amigo').substring(0, 10);
             }
-            if (friendSide === PLAYER_RED) {
-                await friendRoomRef.transaction(currentRoom => {
-                    if (!currentRoom || currentRoom.status !== 'waiting' || !currentRoom.playerA?.uid || !currentRoom.playerB?.uid) {
-                        return;
-                    }
-                    const initial = createFriendInitialBoard();
-                    currentRoom.status = 'playing';
-                    currentRoom.game = {
-                        board: initial,
+            // Não deixa a tela vazia enquanto o Firebase sincroniza a sala.
+            renderBoard();
+            updateUI();
+
+            try {
+                if (friendSide === PLAYER_RED) {
+                    // A transação ocorre somente no nó game, evitando sobrescrever
+                    // os dados dos jogadores gravados no restante da sala.
+                    const initialGame = {
+                        board: createFriendInitialBoard(),
                         currentPlayer: PLAYER_RED,
                         revision: Date.now(),
                         isSuddenDeath: false,
@@ -1720,15 +1738,34 @@
                         suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
                         mustCaptureChain: false
                     };
-                    return currentRoom;
-                });
-            }
-            const started = (await friendRoomRef.once('value')).val();
-            if (started?.game) {
-                boardState = typeof started.game.board === 'string' ? JSON.parse(started.game.board) : started.game.board;
-                currentPlayer = started.game.currentPlayer;
-                friendLastRevision = started.game.revision || 0;
-                renderBoard(); updateUI(); startTimers();
+                    await friendRoomRef.child('game').transaction(currentGame => currentGame || initialGame);
+                    await friendRoomRef.update({ status: 'playing' });
+                }
+
+                // Ambos os jogadores leem o mesmo estado oficial da partida.
+                const started = (await friendRoomRef.once('value')).val();
+                if (started?.game?.board) {
+                    const receivedBoard = typeof started.game.board === 'string'
+                        ? JSON.parse(started.game.board)
+                        : started.game.board;
+                    if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
+                        boardState = receivedBoard;
+                    }
+                    currentPlayer = started.game.currentPlayer || PLAYER_RED;
+                    isSuddenDeath = !!started.game.isSuddenDeath;
+                    matchTimeRemaining = started.game.matchTimeRemaining ?? MATCH_DURATION_SECONDS;
+                    suddenDeathTimeRemaining = started.game.suddenDeathTimeRemaining ?? SUDDEN_DEATH_DURATION_SECONDS;
+                    mustCaptureChain = !!started.game.mustCaptureChain;
+                    friendLastRevision = started.game.revision || 0;
+                    renderBoard();
+                    updateUI();
+                    if (!matchTimerInterval) startTimers();
+                }
+            } catch (error) {
+                console.error('Erro ao inicializar partida entre amigos:', error);
+                showToast('A partida abriu, mas houve uma falha ao sincronizar. Verifique o console e a conexão.', 'error');
+            } finally {
+                friendStarting = false;
             }
         }
 
