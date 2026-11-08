@@ -683,15 +683,20 @@
 
         let userAccounts = [];
         let activeAccount = null;
-        let isAccountLinked = true;
+        let isAccountLinked = false;
+        let firebaseAuth = null;
+        let firebaseDb = null;
+        let firebaseAuthReady = false;
+        let cloudAccountSyncInProgress = false;
 
-        const FIREBASE_CONFIG = window.DAMAS_FIREBASE_CONFIG || {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
-            projectId: "SEU_PROJETO",
-            appId: "SEU_APP_ID"
-        };
+        const firebaseConfig = {
+  apiKey: "AIzaSyBags0sVB2E12TC6Eq58-WThla4aWfrIIk",
+  authDomain: "torneios-de-damas-6x6.firebaseapp.com",
+  projectId: "torneios-de-damas-6x6",
+  storageBucket: "torneios-de-damas-6x6.firebasestorage.app",
+  messagingSenderId: "534839589851",
+  appId: "1:534839589851:web:68278c170cb344a19445fe"
+};
         let friendDb = null, friendAuthUid = null, friendRoomId = null;
         let friendRoomRef = null, friendRoomUnsubscribe = null;
         let friendMode = false, friendSide = null, friendOpponent = null;
@@ -753,6 +758,125 @@
 
             localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(userAccounts));
             localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccount.id);
+
+            if (!cloudAccountSyncInProgress) {
+                saveAccountToCloud().catch(error => console.error("Erro ao sincronizar conta:", error));
+            }
+        }
+
+        function isGoogleUser(user) {
+            return !!user && (user.providerData || []).some(provider => provider.providerId === "google.com");
+        }
+
+        function isFirebaseConfigured() {
+            return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey &&
+                FIREBASE_CONFIG.apiKey !== "SUA_API_KEY" && FIREBASE_CONFIG.projectId &&
+                FIREBASE_CONFIG.projectId !== "SEU_PROJETO" && FIREBASE_CONFIG.authDomain &&
+                !FIREBASE_CONFIG.authDomain.includes("SEU_PROJETO") && FIREBASE_CONFIG.databaseURL &&
+                !FIREBASE_CONFIG.databaseURL.includes("SEU_PROJETO"));
+        }
+
+        function getCloudAccountRef(uid) {
+            return firebaseDb && uid ? firebaseDb.ref("playerAccounts/" + uid) : null;
+        }
+
+        async function saveAccountToCloud() {
+            const user = firebaseAuth && firebaseAuth.currentUser;
+            if (!user || !isGoogleUser(user) || !activeAccount || !firebaseDb) return;
+
+            await getCloudAccountRef(user.uid).update({
+                id: activeAccount.id,
+                username: activeAccount.username || "",
+                avatar: activeAccount.avatar || "",
+                lastNameChange: activeAccount.lastNameChange || null,
+                balance: Number(activeAccount.balance ?? userBalance ?? 0),
+                tickets: Number(activeAccount.tickets ?? activeTickets ?? 0),
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        async function applyGoogleAccount(user) {
+            if (!isGoogleUser(user) || !firebaseDb) return;
+
+            cloudAccountSyncInProgress = true;
+            try {
+                const snapshot = await getCloudAccountRef(user.uid).once("value");
+                const cloudAccount = snapshot.val();
+
+                if (cloudAccount && cloudAccount.id) {
+                    const restored = {
+                        ...createDefaultAccount(),
+                        ...cloudAccount,
+                        googleLinked: true,
+                        firebaseUid: user.uid
+                    };
+                    const existingIndex = userAccounts.findIndex(account => account.id === restored.id);
+                    if (existingIndex >= 0) userAccounts[existingIndex] = restored;
+                    else userAccounts.push(restored);
+                    activeAccount = restored;
+                    syncGlobalVariablesWithAccount();
+                } else {
+                    activeAccount.googleLinked = true;
+                    activeAccount.firebaseUid = user.uid;
+                    await getCloudAccountRef(user.uid).set({
+                        id: activeAccount.id,
+                        username: activeAccount.username || "",
+                        avatar: activeAccount.avatar || "",
+                        lastNameChange: activeAccount.lastNameChange || null,
+                        balance: Number(activeAccount.balance ?? userBalance ?? 0),
+                        tickets: Number(activeAccount.tickets ?? activeTickets ?? 0),
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+
+                isAccountLinked = true;
+                localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(userAccounts));
+                localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccount.id);
+                updatePlayerProfileUI();
+                updateBalanceDisplay();
+            } finally {
+                cloudAccountSyncInProgress = false;
+            }
+        }
+
+        async function initializeFirebaseAuth() {
+            if (!isFirebaseConfigured() || !window.firebase) {
+                console.warn("Firebase não configurado. A vinculação Google está indisponível.");
+                return;
+            }
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+                firebaseAuth = firebase.auth();
+                firebaseDb = firebase.database();
+                friendDb = firebaseDb;
+
+                firebaseAuth.onAuthStateChanged(async user => {
+                    try {
+                        friendAuthUid = user ? user.uid : null;
+                        if (isGoogleUser(user)) {
+                            await applyGoogleAccount(user);
+                        } else if (user && activeAccount) {
+                            activeAccount.googleLinked = false;
+                            isAccountLinked = false;
+                            updatePlayerProfileUI();
+                        }
+                    } catch (error) {
+                        console.error("Erro ao carregar conta autenticada:", error);
+                        showToast("Não foi possível carregar os dados da conta na nuvem.", "error");
+                    }
+                });
+
+                if (!firebaseAuth.currentUser) {
+                    const credential = await firebaseAuth.signInAnonymously();
+                    friendAuthUid = credential.user.uid;
+                } else {
+                    friendAuthUid = firebaseAuth.currentUser.uid;
+                }
+                firebaseAuthReady = true;
+            } catch (error) {
+                console.error("Falha ao inicializar Firebase:", error);
+                showToast("Não foi possível conectar ao Firebase. Confira a configuração.", "error");
+            }
         }
 
         function syncGlobalVariablesWithAccount() {
@@ -764,9 +888,9 @@
         function updatePlayerProfileUI() {
     if (!activeAccount) return;
 
-    // Se a propriedade googleLinked não existir na conta carregada, define como true por padrão
+    // Ausência de autenticação nunca deve ser interpretada como conta vinculada.
     if (activeAccount.googleLinked === undefined) {
-        activeAccount.googleLinked = true;
+        activeAccount.googleLinked = false;
     }
 
     document.getElementById('main-menu-avatar').src = activeAccount.avatar;
@@ -838,47 +962,96 @@
         inputUsername.disabled = false;
     }
 }
-        function toggleAccountLink() {
-    if (!activeAccount) return;
+        async function toggleAccountLink() {
+            if (!activeAccount) return;
+            const button = document.getElementById("btn-toggle-link-account");
+            button.disabled = true;
 
-    // Alterna o estado atual
-    activeAccount.googleLinked = !activeAccount.googleLinked;
-    
-    // Salva as alterações no localStorage
-    saveAccountsData();
-    
-    // Atualiza a interface da modal refletindo o novo estado imediatamente
-    updatePlayerProfileUI();
+            try {
+                if (!isFirebaseConfigured() || !firebaseAuth || !firebaseDb) {
+                    showToast("Configure o Firebase para habilitar a vinculação Google.", "error");
+                    return;
+                }
 
-    if (!activeAccount.googleLinked) {
-        // Se desvinculou: esconde o botão "X" de fechar para forçar a tela de login/vínculo
-        document.getElementById('btn-close-profile').classList.add('hidden');
-        showToast("Conta desvinculada.", 'info');
-    } else {
-        // Se vinculou: mostra o botão "X" novamente e limpa os campos
-        document.getElementById('btn-close-profile').classList.remove('hidden');
-        document.getElementById('input-username').value = '';
-        document.getElementById('input-username').placeholder = 'Ex.: Jogador123';
-        showToast("Conta Google vinculada com sucesso!", 'success');
-    }
-}
+                const currentUser = firebaseAuth.currentUser;
+                if (isGoogleUser(currentUser)) {
+                    // Desconecta a sessão deste dispositivo, preservando os dados na nuvem.
+                    await firebaseAuth.signOut();
+                    await firebaseAuth.signInAnonymously();
+                    activeAccount.googleLinked = false;
+                    delete activeAccount.firebaseUid;
+                    isAccountLinked = false;
+                    saveAccountsData();
+                    updatePlayerProfileUI();
+                    document.getElementById("btn-close-profile").classList.remove("hidden");
+                    showToast("Conta Google desconectada deste dispositivo.", "info");
+                    return;
+                }
 
-        function deletePlayerAccount() {
-            if (confirm("Tem certeza que deseja excluir sua conta permanentemente? Todos os seus dados, saldo e ingressos serão perdidos.")) {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: "select_account" });
+                let credential;
+
+                try {
+                    if (currentUser && currentUser.isAnonymous) {
+                        credential = await currentUser.linkWithPopup(provider);
+                    } else {
+                        credential = await firebaseAuth.signInWithPopup(provider);
+                    }
+                } catch (error) {
+                    if (error.code === "auth/credential-already-in-use" ||
+                        error.code === "auth/account-exists-with-different-credential") {
+                        credential = await firebaseAuth.signInWithPopup(provider);
+                    } else {
+                        throw error;
+                    }
+                }
+
+                await applyGoogleAccount(credential.user);
+                document.getElementById("btn-close-profile").classList.remove("hidden");
+                showToast("Conta Google vinculada e dados sincronizados!", "success");
+            } catch (error) {
+                console.error("Erro na vinculação Google:", error);
+                let message = "Não foi possível vincular a conta Google.";
+                if (error.code === "auth/popup-closed-by-user") message = "A janela do Google foi fechada antes da conclusão.";
+                else if (error.code === "auth/popup-blocked") message = "O navegador bloqueou a janela. Permita pop-ups para este site.";
+                else if (error.code === "auth/unauthorized-domain") message = "Este domínio não está autorizado no Firebase Authentication.";
+                else if (error.code === "auth/operation-not-allowed") message = "Ative o provedor Google no Firebase Authentication.";
+                else if (error.code === "auth/network-request-failed") message = "Falha de conexão. Verifique sua internet e tente novamente.";
+                showToast(message, "error");
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function deletePlayerAccount() {
+            if (!confirm("Tem certeza que deseja excluir sua conta? Os dados locais e o perfil salvo na nuvem serão apagados.")) return;
+
+            try {
+                const user = firebaseAuth && firebaseAuth.currentUser;
+                if (isGoogleUser(user) && firebaseDb) {
+                    await getCloudAccountRef(user.uid).remove();
+                    await firebaseAuth.signOut();
+                    await firebaseAuth.signInAnonymously();
+                }
+
                 localStorage.removeItem(STORAGE_KEY_ACCOUNTS);
                 localStorage.removeItem(STORAGE_KEY_ACTIVE_ID);
 
                 const acc = createDefaultAccount();
                 userAccounts = [acc];
                 activeAccount = acc;
-                saveAccountsData();
                 syncGlobalVariablesWithAccount();
+                saveAccountsData();
                 updateBalanceDisplay();
                 updatePlayerProfileUI();
 
                 document.getElementById('modal-player-profile').classList.add('hidden');
                 showMainMenu();
-                showToast("Conta excluída e redefinida com sucesso.", 'success');
+                showToast("Dados da conta excluídos.", 'success');
+            } catch (error) {
+                console.error("Erro ao excluir dados da conta:", error);
+                showToast("Não foi possível excluir os dados salvos na nuvem.", "error");
             }
         }
 
@@ -1121,30 +1294,20 @@
         let modalRoundResult, resIconBox, resTitle, resMessage, resPrizeBox, resPrizeText, resActionContainer, modalWithdraw, modalRules;
         let modalPlayerProfile;
 
-        window.onload = function() {
-    bindDOMElements();
-    loadAccountData();
-    updateBalanceDisplay();
-    setupEventListeners();
+        window.onload = async function() {
+            bindDOMElements();
+            loadAccountData();
+            updateBalanceDisplay();
+            setupEventListeners();
 
-    // Se for o primeiro acesso ou a conta estiver desvinculada
-    if (activeAccount && activeAccount.googleLinked === false) {
-        isAccountLinked = false;
-        const dataContainer = document.getElementById('profile-data-container');
-        if (dataContainer) dataContainer.classList.add('hidden');
-        
-        const linkBtn = document.getElementById('btn-toggle-link-account');
-        if (linkBtn) {
-            linkBtn.className = "w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white border border-sky-400/50 rounded-xl font-extrabold text-xs transition-all flex items-center justify-center gap-2 shadow-lg";
-            linkBtn.innerHTML = '<i class="fa-brands fa-google text-white text-sm"></i> Vincular Conta Google';
-        }
-        
-        const closeBtn = document.getElementById('btn-close-profile');
-        if (closeBtn) closeBtn.classList.add('hidden');
-        
-        modalPlayerProfile.classList.remove('hidden');
-    }
-};
+            if (activeAccount && !activeAccount.googleLinked) {
+                const closeBtn = document.getElementById("btn-close-profile");
+                if (closeBtn) closeBtn.classList.add("hidden");
+                modalPlayerProfile.classList.remove("hidden");
+            }
+
+            await initializeFirebaseAuth();
+        };
 
         function bindDOMElements() {
             viewMainMenu = document.getElementById('view-main-menu');
