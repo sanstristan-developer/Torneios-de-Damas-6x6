@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
     <title>Torneio de Damas 6x6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -675,7 +676,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 
     <!-- JAVASCRIPT -->
     <script>
@@ -687,10 +687,8 @@
         let isAccountLinked = false;
         let firebaseAuth = null;
         let firebaseDb = null;
-        let firebaseStorage = null;
         let firebaseAuthReady = false;
         let cloudAccountSyncInProgress = false;
-        let cloudSaveQueue = Promise.resolve();
 
         const FIREBASE_CONFIG = {
     apiKey: "AIzaSyBags0sVB2E12TC6Eq58-WThla4aWfrIIk",
@@ -757,20 +755,14 @@
 
         function saveAccountsData() {
             if (!activeAccount) return;
+            activeAccount.balance = userBalance;
+            activeAccount.tickets = activeTickets;
 
-            // Mantém o cache local atualizado imediatamente.
-            activeAccount.balance = Number(userBalance ?? activeAccount.balance ?? 0);
-            activeAccount.tickets = Number(activeTickets ?? activeAccount.tickets ?? 0);
             localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(userAccounts));
             localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeAccount.id);
 
-            // A gravação na nuvem é serializada para evitar que salvamentos rápidos
-            // sobrescrevam dados mais recentes com uma operação anterior.
-            if (!cloudAccountSyncInProgress && firebaseAuth?.currentUser && isGoogleUser(firebaseAuth.currentUser)) {
-                saveAccountToCloud().catch(error => {
-                    console.error("Erro ao sincronizar conta:", error);
-                    showToast("Os dados foram salvos neste dispositivo, mas a sincronização na nuvem falhou.", "error");
-                });
+            if (!cloudAccountSyncInProgress) {
+                saveAccountToCloud().catch(error => console.error("Erro ao sincronizar conta:", error));
             }
         }
 
@@ -790,67 +782,19 @@
             return firebaseDb && uid ? firebaseDb.ref("playerAccounts/" + uid) : null;
         }
 
-        function buildCloudAccountData(account, user) {
-            return {
-                schemaVersion: 2,
-                uid: user.uid,
-                id: account.id,
-                username: account.username || "",
-                avatar: account.avatar || "",
-                lastNameChange: account.lastNameChange || null,
-                balance: Number(account.balance ?? 0),
-                tickets: Number(account.tickets ?? 0),
-                email: user.email || null,
-                displayName: user.displayName || null,
-                photoURL: user.photoURL || null,
-                updatedAt: firebase.database.ServerValue.TIMESTAMP
-            };
-        }
-
         async function saveAccountToCloud() {
             const user = firebaseAuth && firebaseAuth.currentUser;
-            if (!user || ! isGoogleUser(user) || !activeAccount || !firebaseDb) return;
+            if (!user || !isGoogleUser(user) || !activeAccount || !firebaseDb) return;
 
-            const accountToSave = { ...activeAccount };
-            accountToSave.balance = Number(userBalance ?? accountToSave.balance ?? 0);
-            accountToSave.tickets = Number(activeTickets ?? accountToSave.tickets ?? 0);
-            const payload = buildCloudAccountData(accountToSave, user);
-
-            cloudSaveQueue = cloudSaveQueue.catch(() => {}).then(async () => {
-                // Confere novamente a sessão antes de gravar.
-                const currentUser = firebaseAuth?.currentUser;
-                if (!currentUser || currentUser.uid !== user.uid) return;
-                await getCloudAccountRef(user.uid).update(payload);
+            await getCloudAccountRef(user.uid).update({
+                id: activeAccount.id,
+                username: activeAccount.username || "",
+                avatar: activeAccount.avatar || "",
+                lastNameChange: activeAccount.lastNameChange || null,
+                balance: Number(activeAccount.balance ?? userBalance ?? 0),
+                tickets: Number(activeAccount.tickets ?? activeTickets ?? 0),
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
             });
-
-            return cloudSaveQueue;
-        }
-
-        async function uploadAvatarToCloud(file) {
-            const user = firebaseAuth && firebaseAuth.currentUser;
-            if (!user || !isGoogleUser(user) || !firebaseStorage) {
-                throw new Error("É necessário estar conectado ao Google para enviar a foto.");
-            }
-            if (!file || !file.type.startsWith("image/")) {
-                throw new Error("Selecione um arquivo de imagem válido.");
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                throw new Error("A imagem deve ter no máximo 5 MB.");
-            }
-
-            const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-            const uploadRef = firebaseStorage.ref("playerAvatars/" + user.uid + "/profile." + extension);
-            await uploadRef.put(file, { contentType: file.type });
-            const downloadURL = await uploadRef.getDownloadURL();
-
-            // Atualiza o perfil apenas depois de o arquivo estar disponível na nuvem.
-            if (firebaseAuth?.currentUser?.uid !== user.uid) {
-                throw new Error("A sessão Google foi alterada durante o envio.");
-            }
-            activeAccount.avatar = downloadURL;
-            saveAccountsData();
-            await saveAccountToCloud();
-            return downloadURL;
         }
 
         async function applyGoogleAccount(user) {
@@ -862,29 +806,29 @@
                 const cloudAccount = snapshot.val();
 
                 if (cloudAccount && cloudAccount.id) {
-                    // A nuvem é a fonte principal quando já existe um perfil para este UID.
                     const restored = {
                         ...createDefaultAccount(),
                         ...cloudAccount,
                         googleLinked: true,
-                        firebaseUid: user.uid,
-                        balance: Number(cloudAccount.balance ?? 10),
-                        tickets: Number(cloudAccount.tickets ?? 0)
+                        firebaseUid: user.uid
                     };
-                    const existingIndex = userAccounts.findIndex(account =>
-                        account.firebaseUid === user.uid || account.id === restored.id
-                    );
+                    const existingIndex = userAccounts.findIndex(account => account.id === restored.id);
                     if (existingIndex >= 0) userAccounts[existingIndex] = restored;
                     else userAccounts.push(restored);
                     activeAccount = restored;
                     syncGlobalVariablesWithAccount();
                 } else {
-                    // Primeiro acesso deste Google: associa o perfil local atual ao UID.
                     activeAccount.googleLinked = true;
                     activeAccount.firebaseUid = user.uid;
-                    activeAccount.balance = Number(userBalance ?? activeAccount.balance ?? 10);
-                    activeAccount.tickets = Number(activeTickets ?? activeAccount.tickets ?? 0);
-                    await getCloudAccountRef(user.uid).set(buildCloudAccountData(activeAccount, user));
+                    await getCloudAccountRef(user.uid).set({
+                        id: activeAccount.id,
+                        username: activeAccount.username || "",
+                        avatar: activeAccount.avatar || "",
+                        lastNameChange: activeAccount.lastNameChange || null,
+                        balance: Number(activeAccount.balance ?? userBalance ?? 0),
+                        tickets: Number(activeAccount.tickets ?? activeTickets ?? 0),
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
                 }
 
                 isAccountLinked = true;
@@ -907,7 +851,6 @@
                 if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
                 firebaseAuth = firebase.auth();
                 firebaseDb = firebase.database();
-                firebaseStorage = firebase.storage();
                 friendDb = firebaseDb;
 
                 firebaseAuth.onAuthStateChanged(async user => {
@@ -1094,13 +1037,6 @@
                 const user = firebaseAuth && firebaseAuth.currentUser;
                 if (isGoogleUser(user) && firebaseDb) {
                     await getCloudAccountRef(user.uid).remove();
-                    if (firebaseStorage) {
-                        try { await firebaseStorage.ref("playerAvatars/" + user.uid).listAll().then(result =>
-                            Promise.all(result.items.map(item => item.delete()))
-                        ); } catch (storageError) {
-                            console.warn("Não foi possível remover arquivos antigos de avatar:", storageError);
-                        }
-                    }
                     await firebaseAuth.signOut();
                     friendAuthUid = null;
                 }
@@ -1163,29 +1099,26 @@
             activeAccount.lastNameChange = now;
             saveAccountsData();
             updatePlayerProfileUI();
-            saveAccountToCloud().then(() => {
-                showToast("Nome de usuário atualizado!", "success");
-            }).catch(error => {
-                console.error("Erro ao salvar nome na nuvem:", error);
-                showToast("Nome atualizado neste dispositivo, mas não foi sincronizado na nuvem.", "error");
-            });
+            showToast("Nome de usuário atualizado!", 'success');
         }
 
-        async function handleAvatarFileUpload(e) {
+        function handleAvatarFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            try {
-                showToast("Enviando foto para a nuvem...", "info");
-                await uploadAvatarToCloud(file);
-                updatePlayerProfileUI();
-                showToast("Foto de perfil salva na nuvem!", "success");
-            } catch (error) {
-                console.error("Erro ao enviar avatar:", error);
-                showToast(error.message || "Não foi possível salvar a foto na nuvem.", "error");
-            } finally {
-                e.target.value = "";
+            if (!file.type.startsWith('image/')) {
+                showToast("Selecione um arquivo de imagem válido.", 'error');
+                return;
             }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                activeAccount.avatar = evt.target.result;
+                saveAccountsData();
+                updatePlayerProfileUI();
+                showToast("Foto de perfil atualizada!", 'success');
+            };
+            reader.readAsDataURL(file);
         }
 
         function handleAvatarUrlPrompt() {
@@ -1194,12 +1127,7 @@
                 activeAccount.avatar = url.trim();
                 saveAccountsData();
                 updatePlayerProfileUI();
-                saveAccountToCloud().then(() => {
-                    showToast("Foto de perfil atualizada e sincronizada!", "success");
-                }).catch(error => {
-                    console.error("Erro ao salvar URL do avatar:", error);
-                    showToast("Foto alterada neste dispositivo; falha ao sincronizar na nuvem.", "error");
-                });
+                showToast("Foto de perfil atualizada!", 'success');
             }
         }
 
