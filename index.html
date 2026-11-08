@@ -842,7 +842,8 @@
 
         async function initializeFirebaseAuth() {
             if (!isFirebaseConfigured() || !window.firebase) {
-                console.warn("Firebase não configurado. A vinculação Google está indisponível.");
+                console.warn("Firebase não configurado. A autenticação Google está indisponível.");
+                showToast("Não foi possível iniciar a autenticação. Verifique a configuração do Firebase.", "error");
                 return;
             }
             try {
@@ -853,13 +854,20 @@
 
                 firebaseAuth.onAuthStateChanged(async user => {
                     try {
-                        friendAuthUid = user ? user.uid : null;
+                        friendAuthUid = isGoogleUser(user) ? user.uid : null;
+
                         if (isGoogleUser(user)) {
                             await applyGoogleAccount(user);
-                        } else if (user && activeAccount) {
-                            activeAccount.googleLinked = false;
+                            document.getElementById("btn-close-profile").classList.remove("hidden");
+                            modalPlayerProfile.classList.add("hidden");
+                            document.getElementById("view-main-menu").classList.remove("hidden");
+                        } else {
                             isAccountLinked = false;
+                            if (activeAccount) activeAccount.googleLinked = false;
                             updatePlayerProfileUI();
+                            // Sem uma conta Google autenticada, o modal permanece como tela de entrada.
+                            document.getElementById("btn-close-profile").classList.add("hidden");
+                            modalPlayerProfile.classList.remove("hidden");
                         }
                     } catch (error) {
                         console.error("Erro ao carregar conta autenticada:", error);
@@ -867,11 +875,10 @@
                     }
                 });
 
-                if (!firebaseAuth.currentUser) {
-                    const credential = await firebaseAuth.signInAnonymously();
-                    friendAuthUid = credential.user.uid;
-                } else {
+                if (isGoogleUser(firebaseAuth.currentUser)) {
                     friendAuthUid = firebaseAuth.currentUser.uid;
+                } else {
+                    friendAuthUid = null;
                 }
                 firebaseAuthReady = true;
             } catch (error) {
@@ -976,16 +983,17 @@
 
                 const currentUser = firebaseAuth.currentUser;
                 if (isGoogleUser(currentUser)) {
-                    // Desconecta a sessão deste dispositivo, preservando os dados na nuvem.
+                    // Encerra a sessão. O site ficará bloqueado até outra conta Google ser autenticada.
                     await firebaseAuth.signOut();
-                    await firebaseAuth.signInAnonymously();
+                    friendAuthUid = null;
                     activeAccount.googleLinked = false;
                     delete activeAccount.firebaseUid;
                     isAccountLinked = false;
-                    saveAccountsData();
+                    localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(userAccounts));
                     updatePlayerProfileUI();
-                    document.getElementById("btn-close-profile").classList.remove("hidden");
-                    showToast("Conta Google desconectada deste dispositivo.", "info");
+                    document.getElementById("btn-close-profile").classList.add("hidden");
+                    modalPlayerProfile.classList.remove("hidden");
+                    showToast("Conta Google desconectada. Vincule uma conta para continuar.", "info");
                     return;
                 }
 
@@ -994,11 +1002,7 @@
                 let credential;
 
                 try {
-                    if (currentUser && currentUser.isAnonymous) {
-                        credential = await currentUser.linkWithPopup(provider);
-                    } else {
-                        credential = await firebaseAuth.signInWithPopup(provider);
-                    }
+                    credential = await firebaseAuth.signInWithPopup(provider);
                 } catch (error) {
                     if (error.code === "auth/credential-already-in-use" ||
                         error.code === "auth/account-exists-with-different-credential") {
@@ -1033,7 +1037,7 @@
                 if (isGoogleUser(user) && firebaseDb) {
                     await getCloudAccountRef(user.uid).remove();
                     await firebaseAuth.signOut();
-                    await firebaseAuth.signInAnonymously();
+                    friendAuthUid = null;
                 }
 
                 localStorage.removeItem(STORAGE_KEY_ACCOUNTS);
@@ -1301,11 +1305,11 @@
             updateBalanceDisplay();
             setupEventListeners();
 
-            if (activeAccount && !activeAccount.googleLinked) {
-                const closeBtn = document.getElementById("btn-close-profile");
-                if (closeBtn) closeBtn.classList.add("hidden");
-                modalPlayerProfile.classList.remove("hidden");
-            }
+            // O acesso ao jogo só é liberado após autenticação com Google.
+            const closeBtn = document.getElementById("btn-close-profile");
+            if (closeBtn) closeBtn.classList.add("hidden");
+            modalPlayerProfile.classList.remove("hidden");
+            viewMainMenu.classList.add("hidden");
 
             await initializeFirebaseAuth();
         };
@@ -1480,8 +1484,8 @@
             try {
                 if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
                 friendDb = firebase.database();
-                const credential = await firebase.auth().signInAnonymously();
-                friendAuthUid = credential.user.uid;
+                const user = firebase.auth().currentUser;
+                friendAuthUid = isGoogleUser(user) ? user.uid : null;
             } catch (error) {
                 console.error("Firebase do modo amigo:", error);
                 showToast("Não foi possível conectar ao serviço de partidas entre amigos.", "error");
@@ -1489,6 +1493,10 @@
         }
 
         function openFriendMatch() {
+            if (!isGoogleUser(firebaseAuth && firebaseAuth.currentUser)) {
+                showToast("Vincule uma conta Google para acessar o jogo.", "error");
+                return;
+            }
             isPracticeMode = false;
             viewMainMenu.classList.add('hidden');
             viewMainMenu.classList.remove('flex');
