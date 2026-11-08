@@ -1601,19 +1601,19 @@
                 const ids = [activeAccount.id, targetId].sort();
                 friendRoomId = ids.join('_').replace(/[^A-Z0-9_]/g, '');
                 friendRoomRef = friendDb.ref('friendMatches/' + friendRoomId);
-                const snap = await friendRoomRef.once('value');
-                let room = snap.val();
-                if (!room || room.status === 'finished' || room.status === 'cancelled') {
-                    room = {
-                        status: 'waiting',
-                        playerA: { id: ids[0], username: activeAccount.id === ids[0] ? activeAccount.username : targetId, uid: null },
-                        playerB: { id: ids[1], username: activeAccount.id === ids[1] ? activeAccount.username : targetId, uid: null },
-                        createdAt: firebase.database.ServerValue.TIMESTAMP,
-                        rematch: { A: false, B: false }
-                    };
-                    await friendRoomRef.set(room);
-                    room = (await friendRoomRef.once('value')).val();
-                }
+                await friendRoomRef.transaction(currentRoom => {
+                    if (!currentRoom || currentRoom.status === 'finished' || currentRoom.status === 'cancelled') {
+                        return {
+                            status: 'waiting',
+                            playerA: { id: ids[0], username: activeAccount.id === ids[0] ? activeAccount.username : targetId, uid: null },
+                            playerB: { id: ids[1], username: activeAccount.id === ids[1] ? activeAccount.username : targetId, uid: null },
+                            createdAt: firebase.database.ServerValue.TIMESTAMP,
+                            rematch: { A: false, B: false }
+                        };
+                    }
+                    return currentRoom;
+                });
+                const room = (await friendRoomRef.once('value')).val();
                 const slot = activeAccount.id === ids[0] ? 'A' : 'B';
                 const otherSlot = slot === 'A' ? 'B' : 'A';
                 const myPlayer = { id: activeAccount.id, username: activeAccount.username, uid: friendAuthUid };
@@ -1644,7 +1644,7 @@
                     const g = room.game;
                     if (g.revision !== friendLastRevision) {
                         friendLastRevision = g.revision || 0;
-                        boardState = g.board || boardState;
+                        boardState = typeof g.board === 'string' ? JSON.parse(g.board) : (g.board || boardState);
                         currentPlayer = g.currentPlayer || currentPlayer;
                         isSuddenDeath = !!g.isSuddenDeath;
                         matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
@@ -1704,25 +1704,29 @@
             if (friendSide === PLAYER_DARK) {
                 document.getElementById('player-red-card').querySelector('#in-game-user-name').textContent = (other.username || 'Amigo').substring(0, 10);
             }
-            const current = (await friendRoomRef.once('value')).val();
-            if (current?.status === 'waiting' && current.playerA?.uid && current.playerB?.uid) {
-                await friendRoomRef.update({ status: 'playing' });
-                if (friendSide === PLAYER_RED) {
-    const initial = createFriendInitialBoard();
-    await friendRoomRef.child('game').set({ 
-        board: JSON.stringify(initial), // <-- Envia serializado
-        currentPlayer: PLAYER_RED, 
-        revision: Date.now(), 
-        isSuddenDeath: false, 
-        matchTimeRemaining: MATCH_DURATION_SECONDS, 
-        suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS, 
-        mustCaptureChain: false 
-    });
+            if (friendSide === PLAYER_RED) {
+                await friendRoomRef.transaction(currentRoom => {
+                    if (!currentRoom || currentRoom.status !== 'waiting' || !currentRoom.playerA?.uid || !currentRoom.playerB?.uid) {
+                        return;
                     }
+                    const initial = createFriendInitialBoard();
+                    currentRoom.status = 'playing';
+                    currentRoom.game = {
+                        board: initial,
+                        currentPlayer: PLAYER_RED,
+                        revision: Date.now(),
+                        isSuddenDeath: false,
+                        matchTimeRemaining: MATCH_DURATION_SECONDS,
+                        suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
+                        mustCaptureChain: false
+                    };
+                    return currentRoom;
+                });
             }
             const started = (await friendRoomRef.once('value')).val();
             if (started?.game) {
-                boardState = started.game.board; currentPlayer = started.game.currentPlayer;
+                boardState = typeof started.game.board === 'string' ? JSON.parse(started.game.board) : started.game.board;
+                currentPlayer = started.game.currentPlayer;
                 friendLastRevision = started.game.revision || 0;
                 renderBoard(); updateUI(); startTimers();
             }
