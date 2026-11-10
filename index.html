@@ -1644,8 +1644,6 @@
                 }
                 if (room.status === 'playing' && room.game && friendMode) {
     const g = room.game;
-    
-    // Atualiza apenas se a jogada veio do oponente (lastPlayer diferente)
     if (g.lastPlayer && g.lastPlayer !== friendSide) {
         const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
         if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
@@ -1655,13 +1653,8 @@
         isSuddenDeath = !!g.isSuddenDeath;
         matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
         suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
-        selectedPiece = null; 
-        validMoves = []; 
-        mustCaptureChain = !!g.mustCaptureChain;
-        
-        renderBoard(); 
-        updateUI();
-        
+        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
+        renderBoard(); updateUI();
         if (!matchTimerInterval) startTimers();
         else if (currentPlayer === friendSide) resetTurnTimer();
     }
@@ -1736,14 +1729,14 @@
                     // A transação ocorre somente no nó game, evitando sobrescrever
                     // os dados dos jogadores gravados no restante da sala.
                     const initialGame = {
-                        board: createFriendInitialBoard(),
-                        currentPlayer: PLAYER_RED,
-                        revision: Date.now(),
-                        isSuddenDeath: false,
-                        matchTimeRemaining: MATCH_DURATION_SECONDS,
-                        suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
-                        mustCaptureChain: false
-                    };
+    board: createFriendInitialBoard(),
+    currentPlayer: PLAYER_RED,
+    lastPlayer: null,
+    isSuddenDeath: false,
+    matchTimeRemaining: MATCH_DURATION_SECONDS,
+    suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
+    mustCaptureChain: false
+};
                     await friendRoomRef.child('game').transaction(currentGame => currentGame || initialGame);
                     await friendRoomRef.update({ status: 'playing' });
                 }
@@ -1790,19 +1783,14 @@
     if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
     friendRoomUpdating = true;
     try {
-        // Usamos uma transação para garantir um contador sequencial único (stepCount)
-        await friendRoomRef.child('game').transaction(currentGame => {
-            const currentSteps = currentGame?.stepCount || 0;
-            return {
-                board: boardState,
-                currentPlayer,
-                lastPlayer: friendSide,
-                stepCount: currentSteps + 1, // Garante que o objeto sempre mude
-                isSuddenDeath,
-                matchTimeRemaining,
-                suddenDeathTimeRemaining,
-                mustCaptureChain
-            };
+        await friendRoomRef.child('game').update({
+            board: boardState,
+            currentPlayer,
+            lastPlayer: friendSide,
+            isSuddenDeath,
+            matchTimeRemaining,
+            suddenDeathTimeRemaining,
+            mustCaptureChain
         });
     } catch (e) { 
         console.error('Falha ao sincronizar jogada:', e); 
