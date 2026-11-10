@@ -1781,16 +1781,31 @@
         }
 
         async function publishFriendGameState() {
-            if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
-            friendRoomUpdating = true;
-            try {
-                const snap = await friendRoomRef.child('game/revision').once('value');
-                const revision = Math.max(Date.now(), (snap.val() || 0) + 1);
-                friendLastRevision = revision;
-                await friendRoomRef.child('game').update({ board: boardState, currentPlayer, revision, isSuddenDeath, matchTimeRemaining, suddenDeathTimeRemaining, mustCaptureChain });
-            } catch (e) { console.error('Falha ao sincronizar jogada:', e); }
-            finally { friendRoomUpdating = false; }
-        }
+    if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
+    friendRoomUpdating = true;
+    try {
+        // Usa uma transação para incrementar a revisão de forma segura e sequencial
+        await friendRoomRef.child('game').transaction(currentGame => {
+            if (!currentGame) return null;
+            const nextRevision = (currentGame.revision || 0) + 1;
+            friendLastRevision = nextRevision;
+            return {
+                ...currentGame,
+                board: boardState,
+                currentPlayer,
+                revision: nextRevision,
+                isSuddenDeath,
+                matchTimeRemaining,
+                suddenDeathTimeRemaining,
+                mustCaptureChain
+            };
+        });
+    } catch (e) { 
+        console.error('Falha ao sincronizar jogada:', e); 
+    } finally { 
+        friendRoomUpdating = false; 
+    }
+}
 
         async function finishFriendMatch(winner, reason) {
             if (!friendMode || friendLocalEnd) return;
