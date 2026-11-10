@@ -1643,32 +1643,23 @@
                     await startFriendRoom(room, slot);
                 }
                 if (room.status === 'playing' && room.game && friendMode) {
-    const g = room.game;
-    
-    // Processa se a última jogada veio do oponente
-    if (g.lastPlayer && g.lastPlayer !== friendSide) {
-        const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
-        
-        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE) {
-            // Atualiza o estado e força o redesenho visual imediato do tabuleiro
-            boardState = receivedBoard;
-            currentPlayer = g.currentPlayer || currentPlayer;
-            isSuddenDeath = !!g.isSuddenDeath;
-            matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
-            suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
-            mustCaptureChain = !!g.mustCaptureChain;
-            
-            selectedPiece = null; 
-            validMoves = [];
-            
-            // Redesenha o tabuleiro e atualiza os placares/turnos na hora
-            renderBoard(); 
-            updateUI();
-            
-            if (!matchTimerInterval) startTimers();
-            else if (currentPlayer === friendSide) resetTurnTimer();
-        }
-    }
+                    const g = room.game;
+                    if (g.revision !== friendLastRevision) {
+                        friendLastRevision = g.revision || 0;
+                        const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
+                        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
+                            boardState = receivedBoard;
+                        }
+                        currentPlayer = g.currentPlayer || currentPlayer;
+                        isSuddenDeath = !!g.isSuddenDeath;
+                        matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
+                        suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
+                        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
+                        renderBoard(); updateUI();
+                        if (!matchTimerInterval) startTimers();
+                        else if (currentPlayer === friendSide) resetTurnTimer();
+                    }
+                }
                 if (room.status === 'finished' && friendMode && room.result && !matchEndHandled) {
                     const winner = room.result.winner;
                     matchEndHandled = true; stopAllTimers();
@@ -1692,76 +1683,91 @@
         let friendLastRevision = 0;
         let friendStarting = false;
         async function startFriendRoom(room, slot) {
-    if (friendMode || friendStarting) return;
-    
-    // Garante que a conta ativa existe antes de iniciar
-    if (!activeAccount) {
-        loadAccountData();
-    }
+            if (friendMode || friendStarting) return;
+            const me = room['player' + slot];
+            const other = room[slot === 'A' ? 'playerB' : 'playerA'];
+            if (!me?.uid || !other?.uid) return;
+            friendStarting = true;
+            friendMode = true;
+            isPracticeMode = false;
+            friendSide = slot === 'A' ? PLAYER_RED : PLAYER_DARK;
+            // Renderiza uma posição inicial local imediatamente; o estado oficial
+            // será recebido do Firebase logo em seguida.
+            boardState = createFriendInitialBoard();
+            currentPlayer = PLAYER_RED;
+            selectedPiece = null;
+            validMoves = [];
+            mustCaptureChain = false;
+            isSuddenDeath = false;
+            matchTimeRemaining = MATCH_DURATION_SECONDS;
+            suddenDeathTimeRemaining = SUDDEN_DEATH_DURATION_SECONDS;
+            friendOpponent = other;
+            friendLocalEnd = false;
+            document.getElementById('view-friend-match').classList.add('hidden');
+            viewMainMenu.classList.add('hidden'); viewLobby.classList.add('hidden'); viewNoTickets.classList.add('hidden');
+            viewGame.classList.remove('hidden'); viewGame.classList.add('flex');
+            
+            document.getElementById('tournament-progress-container').classList.remove('hidden');
+            document.getElementById('mode-header-icon').className = "fa-solid fa-user-group text-sky-400";
+            document.getElementById('mode-header-title').textContent = "PARTIDA ENTRE AMIGOS";
+            document.getElementById('bracket-round-indicator').textContent = 'Partida única';
+            document.getElementById('bracket-steps-grid').classList.add('hidden');
+            tournamentProgressBar.style.width = '100%';
 
-    const me = room['player' + slot];
-    const other = room[slot === 'A' ? 'playerB' : 'playerA'];
-    if (!me?.uid || !other?.uid) return;
+            botNameElem.textContent = (other.username || 'Amigo').substring(0, 10);
+            document.getElementById('in-game-user-name').textContent = activeAccount.username;
+            document.getElementById('in-game-user-avatar').src = activeAccount.avatar;
+            document.getElementById('player-dark-card').querySelector('#bot-name').textContent = friendSide === PLAYER_RED ? (other.username || 'Amigo').substring(0, 10) : activeAccount.username;
+            if (friendSide === PLAYER_DARK) {
+                document.getElementById('player-red-card').querySelector('#in-game-user-name').textContent = (other.username || 'Amigo').substring(0, 10);
+            }
+            // Não deixa a tela vazia enquanto o Firebase sincroniza a sala.
+            renderBoard();
+            updateUI();
 
-    friendStarting = true;
-    friendMode = true;
-    isPracticeMode = false;
-    
-    // Define claramente se você é o Jogador A (RED) ou Jogador B (DARK) com base no seu ID real
-    friendSide = (activeAccount.id === room.playerA.id) ? PLAYER_RED : PLAYER_DARK;
+            try {
+                if (friendSide === PLAYER_RED) {
+                    // A transação ocorre somente no nó game, evitando sobrescrever
+                    // os dados dos jogadores gravados no restante da sala.
+                    const initialGame = {
+                        board: createFriendInitialBoard(),
+                        currentPlayer: PLAYER_RED,
+                        revision: Date.now(),
+                        isSuddenDeath: false,
+                        matchTimeRemaining: MATCH_DURATION_SECONDS,
+                        suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
+                        mustCaptureChain: false
+                    };
+                    await friendRoomRef.child('game').transaction(currentGame => currentGame || initialGame);
+                    await friendRoomRef.update({ status: 'playing' });
+                }
 
-    boardState = createFriendInitialBoard();
-    currentPlayer = PLAYER_RED;
-    selectedPiece = null;
-    validMoves = [];
-    mustCaptureChain = false;
-    isSuddenDeath = false;
-    matchTimeRemaining = MATCH_DURATION_SECONDS;
-    suddenDeathTimeRemaining = SUDDEN_DEATH_DURATION_SECONDS;
-    friendOpponent = other;
-    friendLocalEnd = false;
-
-    document.getElementById('view-friend-match').classList.add('hidden');
-    viewMainMenu.classList.add('hidden'); 
-    viewLobby.classList.add('hidden'); 
-    viewNoTickets.classList.add('hidden');
-    viewGame.classList.remove('hidden'); 
-    viewGame.classList.add('flex');
-    
-    document.getElementById('tournament-progress-container').classList.remove('hidden');
-    document.getElementById('mode-header-icon').className = "fa-solid fa-user-group text-sky-400";
-    document.getElementById('mode-header-title').textContent = "PARTIDA ENTRE AMIGOS";
-    document.getElementById('bracket-round-indicator').textContent = 'Partida única';
-    document.getElementById('bracket-steps-grid').classList.add('hidden');
-    tournamentProgressBar.style.width = '100%';
-
-    botNameElem.textContent = (other.username || 'Amigo').substring(0, 10);
-    document.getElementById('in-game-user-name').textContent = activeAccount.username || 'Você';
-    document.getElementById('in-game-user-avatar').src = activeAccount.avatar;
-    
-    renderBoard();
-    updateUI();
-
-    try {
-        if (friendSide === PLAYER_RED) {
-            const initialGame = {
-                board: createFriendInitialBoard(),
-                currentPlayer: PLAYER_RED,
-                lastPlayer: null,
-                isSuddenDeath: false,
-                matchTimeRemaining: MATCH_DURATION_SECONDS,
-                suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
-                mustCaptureChain: false
-            };
-            await friendRoomRef.child('game').transaction(currentGame => currentGame || initialGame);
-            await friendRoomRef.update({ status: 'playing' });
+                // Ambos os jogadores leem o mesmo estado oficial da partida.
+                const started = (await friendRoomRef.once('value')).val();
+                if (started?.game?.board) {
+                    const receivedBoard = typeof started.game.board === 'string'
+                        ? JSON.parse(started.game.board)
+                        : started.game.board;
+                    if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
+                        boardState = receivedBoard;
+                    }
+                    currentPlayer = started.game.currentPlayer || PLAYER_RED;
+                    isSuddenDeath = !!started.game.isSuddenDeath;
+                    matchTimeRemaining = started.game.matchTimeRemaining ?? MATCH_DURATION_SECONDS;
+                    suddenDeathTimeRemaining = started.game.suddenDeathTimeRemaining ?? SUDDEN_DEATH_DURATION_SECONDS;
+                    mustCaptureChain = !!started.game.mustCaptureChain;
+                    friendLastRevision = started.game.revision || 0;
+                    renderBoard();
+                    updateUI();
+                    if (!matchTimerInterval) startTimers();
+                }
+            } catch (error) {
+                console.error('Erro ao inicializar partida entre amigos:', error);
+                showToast('A partida abriu, mas houve uma falha ao sincronizar. Verifique o console e a conexão.', 'error');
+            } finally {
+                friendStarting = false;
+            }
         }
-    } catch (error) {
-        console.error('Erro ao sincronizar sala:', error);
-    } finally {
-        friendStarting = false;
-    }
-}
 
         function createFriendInitialBoard() {
             const b = Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
@@ -1775,24 +1781,16 @@
         }
 
         async function publishFriendGameState() {
-    if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
-    friendRoomUpdating = true;
-    try {
-        await friendRoomRef.child('game').update({
-            board: boardState,
-            currentPlayer,
-            lastPlayer: friendSide,
-            isSuddenDeath,
-            matchTimeRemaining,
-            suddenDeathTimeRemaining,
-            mustCaptureChain
-        });
-    } catch (e) { 
-        console.error('Falha ao sincronizar jogada:', e); 
-    } finally { 
-        friendRoomUpdating = false; 
-    }
-}
+            if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
+            friendRoomUpdating = true;
+            try {
+                const snap = await friendRoomRef.child('game/revision').once('value');
+                const revision = Math.max(Date.now(), (snap.val() || 0) + 1);
+                friendLastRevision = revision;
+                await friendRoomRef.child('game').update({ board: boardState, currentPlayer, revision, isSuddenDeath, matchTimeRemaining, suddenDeathTimeRemaining, mustCaptureChain });
+            } catch (e) { console.error('Falha ao sincronizar jogada:', e); }
+            finally { friendRoomUpdating = false; }
+        }
 
         async function finishFriendMatch(winner, reason) {
             if (!friendMode || friendLocalEnd) return;
