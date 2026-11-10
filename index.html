@@ -1643,23 +1643,23 @@
                     await startFriendRoom(room, slot);
                 }
                 if (room.status === 'playing' && room.game && friendMode) {
-                    const g = room.game;
-                    if (g.revision !== friendLastRevision) {
-                        friendLastRevision = g.revision || 0;
-                        const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
-                        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
-                            boardState = receivedBoard;
-                        }
-                        currentPlayer = g.currentPlayer || currentPlayer;
-                        isSuddenDeath = !!g.isSuddenDeath;
-                        matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
-                        suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
-                        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
-                        renderBoard(); updateUI();
-                        if (!matchTimerInterval) startTimers();
-                        else if (currentPlayer === friendSide) resetTurnTimer();
-                    }
-                }
+    const g = room.game;
+    // Só atualiza se a jogada veio do oponente, evitando conflito local
+    if (g.lastPlayer !== friendSide) {
+        const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
+        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
+            boardState = receivedBoard;
+        }
+        currentPlayer = g.currentPlayer || currentPlayer;
+        isSuddenDeath = !!g.isSuddenDeath;
+        matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
+        suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
+        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
+        renderBoard(); updateUI();
+        if (!matchTimerInterval) startTimers();
+        else if (currentPlayer === friendSide) resetTurnTimer();
+    }
+}
                 if (room.status === 'finished' && friendMode && room.result && !matchEndHandled) {
                     const winner = room.result.winner;
                     matchEndHandled = true; stopAllTimers();
@@ -1784,21 +1784,15 @@
     if (!friendMode || !friendRoomRef || friendRoomUpdating) return;
     friendRoomUpdating = true;
     try {
-        // Usa uma transação para incrementar a revisão de forma segura e sequencial
-        await friendRoomRef.child('game').transaction(currentGame => {
-            if (!currentGame) return null;
-            const nextRevision = (currentGame.revision || 0) + 1;
-            friendLastRevision = nextRevision;
-            return {
-                ...currentGame,
-                board: boardState,
-                currentPlayer,
-                revision: nextRevision,
-                isSuddenDeath,
-                matchTimeRemaining,
-                suddenDeathTimeRemaining,
-                mustCaptureChain
-            };
+        // Envia o estado e marca qual lado realizou o último movimento
+        await friendRoomRef.child('game').update({
+            board: boardState,
+            currentPlayer,
+            lastPlayer: friendSide,
+            isSuddenDeath,
+            matchTimeRemaining,
+            suddenDeathTimeRemaining,
+            mustCaptureChain
         });
     } catch (e) { 
         console.error('Falha ao sincronizar jogada:', e); 
