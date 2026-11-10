@@ -1670,7 +1670,15 @@
                         await friendRoomRef.update({ status: 'playing', rematch: { A: false, B: false }, result: null, game: null });
                         if (friendSide === PLAYER_RED) {
                             const initial = createFriendInitialBoard();
-                            await friendRoomRef.child('game').set({ board: initial, currentPlayer: PLAYER_RED, revision: Date.now(), isSuddenDeath: false, matchTimeRemaining: MATCH_DURATION_SECONDS, suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS, mustCaptureChain: false });
+                            await friendRoomRef.child('game').set({
+    board: JSON.stringify(initial),
+    currentPlayer: PLAYER_RED,
+    revision: Date.now(),
+    isSuddenDeath: false,
+    matchTimeRemaining: MATCH_DURATION_SECONDS,
+    suddenDeathTimeRemaining: SUDDEN_DEATH_DURATION_SECONDS,
+    mustCaptureChain: false
+});
                         }
                     } else {
                         showToast("Aguardando seu amigo aceitar jogar novamente...", "info");
@@ -1787,7 +1795,15 @@
                 const snap = await friendRoomRef.child('game/revision').once('value');
                 const revision = Math.max(Date.now(), (snap.val() || 0) + 1);
                 friendLastRevision = revision;
-                await friendRoomRef.child('game').update({ board: boardState, currentPlayer, revision, isSuddenDeath, matchTimeRemaining, suddenDeathTimeRemaining, mustCaptureChain });
+                await friendRoomRef.child('game').update({
+    board: JSON.stringify(boardState),
+    currentPlayer,
+    revision,
+    isSuddenDeath,
+    matchTimeRemaining,
+    suddenDeathTimeRemaining,
+    mustCaptureChain
+});
             } catch (e) { console.error('Falha ao sincronizar jogada:', e); }
             finally { friendRoomUpdating = false; }
         }
