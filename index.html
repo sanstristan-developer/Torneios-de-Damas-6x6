@@ -1644,21 +1644,31 @@
                 }
                 if (room.status === 'playing' && room.game && friendMode) {
     const g = room.game;
+    
+    // Processa se a última jogada veio do oponente
     if (g.lastPlayer && g.lastPlayer !== friendSide) {
         const receivedBoard = typeof g.board === 'string' ? JSON.parse(g.board) : g.board;
-        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE && receivedBoard.every(row => Array.isArray(row) && row.length === BOARD_SIZE)) {
+        
+        if (Array.isArray(receivedBoard) && receivedBoard.length === BOARD_SIZE) {
+            // Atualiza o estado e força o redesenho visual imediato do tabuleiro
             boardState = receivedBoard;
+            currentPlayer = g.currentPlayer || currentPlayer;
+            isSuddenDeath = !!g.isSuddenDeath;
+            matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
+            suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
+            mustCaptureChain = !!g.mustCaptureChain;
+            
+            selectedPiece = null; 
+            validMoves = [];
+            
+            // Redesenha o tabuleiro e atualiza os placares/turnos na hora
+            renderBoard(); 
+            updateUI();
+            
+            if (!matchTimerInterval) startTimers();
+            else if (currentPlayer === friendSide) resetTurnTimer();
         }
-        currentPlayer = g.currentPlayer || currentPlayer;
-        isSuddenDeath = !!g.isSuddenDeath;
-        matchTimeRemaining = g.matchTimeRemaining ?? matchTimeRemaining;
-        suddenDeathTimeRemaining = g.suddenDeathTimeRemaining ?? suddenDeathTimeRemaining;
-        selectedPiece = null; validMoves = []; mustCaptureChain = !!g.mustCaptureChain;
-        renderBoard(); updateUI();
-        if (!matchTimerInterval) startTimers();
-        else if (currentPlayer === friendSide) resetTurnTimer();
     }
-}
                 if (room.status === 'finished' && friendMode && room.result && !matchEndHandled) {
                     const winner = room.result.winner;
                     matchEndHandled = true; stopAllTimers();
